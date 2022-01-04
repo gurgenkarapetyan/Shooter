@@ -37,6 +37,11 @@ protected:
 	* @param Rate this is a normalized rate, i.e. 1.0 means 100% desired rate.
 	*/
 	void LookUpAtRate(float Rate);
+
+private:
+	/** Setting some configuration for character movement. */
+	void SetCharacterMovementConfigurations();
+	
 public:	
 	virtual void Tick(float DeltaTime) override;
 	
