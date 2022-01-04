@@ -8,6 +8,8 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class USoundCue;
+class UParticleSystem;
 
 UCLASS()
 class SHOOTER_API AShooterCharacter : public ACharacter
@@ -38,10 +40,20 @@ protected:
 	*/
 	void LookUpAtRate(float Rate);
 
+	/** Called when the fire button is pressed. */
+	void FireWeapon();
 private:
 	/** Setting some configuration for character movement. */
 	void SetCharacterMovementConfigurations();
 	
+	/** Playing fire sound cue when character starts firing. */
+	void PlayFireSoundCue();
+
+	/** Create particle effect when character starts firing. */
+	void CreateFireMuzzleFlashParticle();
+	
+	/** Play fire weapon animation montage when character starts firing. */
+	void PlayFireAnimMontage();
 public:	
 	virtual void Tick(float DeltaTime) override;
 	
@@ -61,6 +73,18 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Camera", meta=(AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 
+	/** Randomized gunshot sound cue. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat", meta=(AllowPrivateAccess = "true"))
+	USoundCue* FireSound;
+
+	/** Flash spawned at barrel socket. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat", meta=(AllowPrivateAccess = "true"))
+	UParticleSystem* MuzzleFlash;
+
+	/** Montage for firing the weapon . */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat", meta=(AllowPrivateAccess = "true"))
+	UAnimMontage* HipFireMontage;
+	
 	/** Base turn rate, in degree/seconds. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Camera", meta=(AllowPrivateAccess = "true"))
 	float BaseTurnRate;

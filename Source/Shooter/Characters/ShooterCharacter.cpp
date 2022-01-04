@@ -5,6 +5,9 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Sound/SoundCue.h"
+#include "Engine/SkeletalMeshSocket.h"
+#include "Kismet/GameplayStatics.h"
 
 AShooterCharacter::AShooterCharacter() :
 	BaseTurnRate(45.0f),
@@ -48,6 +51,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction(TEXT("FireButton"), IE_Pressed, this, &AShooterCharacter::FireWeapon);
 }
 
 void AShooterCharacter::MoveForward(float Value)
@@ -87,6 +91,45 @@ void AShooterCharacter::LookUpAtRate(float Rate)
 {
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
+
+void AShooterCharacter::FireWeapon()
+{
+	PlayFireSoundCue();
+	CreateFireMuzzleFlashParticle();
+	PlayFireAnimMontage();
+}
+
+void AShooterCharacter::PlayFireSoundCue()
+{
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySound2D(this, FireSound);;
+	}
+}
+
+void AShooterCharacter::CreateFireMuzzleFlashParticle()
+{
+	const USkeletalMeshSocket* BarrelSocket = GetMesh()->GetSocketByName("BarrelSocket");
+	if (BarrelSocket)
+	{
+		const FTransform SocketTransform = BarrelSocket->GetSocketTransform(GetMesh());
+		if (MuzzleFlash)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);;
+		}
+	}
+}
+
+void AShooterCharacter::PlayFireAnimMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HipFireMontage)
+	{
+		AnimInstance->Montage_Play(HipFireMontage);
+		AnimInstance->Montage_JumpToSection(FName("StartFire"));
+	}
+}
+
 
 void AShooterCharacter::SetCharacterMovementConfigurations()
 {
