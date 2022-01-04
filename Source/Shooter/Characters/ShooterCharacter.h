@@ -54,6 +54,12 @@ private:
 	
 	/** Play fire weapon animation montage when character starts firing. */
 	void PlayFireAnimMontage();
+
+	/**
+	 * Create LineTrace when character starts firing.
+	 * @param Barrel is Weapon's BarrelSocket Transform information.
+	 */
+	void SetBulletLineTrace(FTransform Barrel);
 public:	
 	virtual void Tick(float DeltaTime) override;
 	

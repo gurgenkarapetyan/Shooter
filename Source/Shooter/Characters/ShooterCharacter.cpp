@@ -8,6 +8,7 @@
 #include "Sound/SoundCue.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 
 AShooterCharacter::AShooterCharacter() :
 	BaseTurnRate(45.0f),
@@ -117,6 +118,8 @@ void AShooterCharacter::CreateFireMuzzleFlashParticle()
 		{
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);;
 		}
+
+		SetBulletLineTrace(SocketTransform);
 	}
 }
 
@@ -127,6 +130,21 @@ void AShooterCharacter::PlayFireAnimMontage()
 	{
 		AnimInstance->Montage_Play(HipFireMontage);
 		AnimInstance->Montage_JumpToSection(FName("StartFire"));
+	}
+}
+
+void AShooterCharacter::SetBulletLineTrace(FTransform Barrel)
+{
+	FHitResult FireHitResult;
+	const FVector Start = Barrel.GetLocation();
+	const FQuat Rotation = Barrel.GetRotation();
+	const FVector RotationAxis = Rotation.GetAxisX();
+	const FVector End = Start + RotationAxis * 50000.f;
+	GetWorld()->LineTraceSingleByChannel(FireHitResult, Start, End, ECollisionChannel::ECC_Visibility);
+	if (FireHitResult.bBlockingHit)
+	{
+		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f);
+		DrawDebugPoint(GetWorld(), FireHitResult.Location, 5.f, FColor::Yellow, 2.f);
 	}
 }
 
