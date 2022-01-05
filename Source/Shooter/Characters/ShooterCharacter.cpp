@@ -8,7 +8,7 @@
 #include "Sound/SoundCue.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
-#include "DrawDebugHelpers.h"
+#include "Particles/ParticleSystemComponent.h"
 
 AShooterCharacter::AShooterCharacter() :
 	BaseTurnRate(45.0f),
@@ -20,6 +20,7 @@ AShooterCharacter::AShooterCharacter() :
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 300.0f;
 	CameraBoom->bUsePawnControlRotation = true;
+	CameraBoom->SocketOffset = FVector(0.f, 50.f, 50.f);
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -140,11 +141,30 @@ void AShooterCharacter::SetBulletLineTrace(FTransform Barrel)
 	const FQuat Rotation = Barrel.GetRotation();
 	const FVector RotationAxis = Rotation.GetAxisX();
 	const FVector End = Start + RotationAxis * 50000.f;
+
+	FVector BeamEndPoint = End;
+	
 	GetWorld()->LineTraceSingleByChannel(FireHitResult, Start, End, ECollisionChannel::ECC_Visibility);
 	if (FireHitResult.bBlockingHit)
 	{
-		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f);
-		DrawDebugPoint(GetWorld(), FireHitResult.Location, 5.f, FColor::Yellow, 2.f);
+		// DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f);
+		// DrawDebugPoint(GetWorld(), FireHitResult.Location, 5.f, FColor::Yellow, false, 2.f);
+
+		BeamEndPoint = FireHitResult.Location;
+		
+		if (ImpactParticle)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, FireHitResult.Location);
+		}
+	}
+
+	if (BeamParticles)
+	{
+		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticles, Barrel);
+		if (Beam)
+		{
+			Beam->SetVectorParameter(FName("Target"), BeamEndPoint);
+		}
 	}
 }
 
@@ -153,11 +173,11 @@ void AShooterCharacter::SetCharacterMovementConfigurations()
 {
 	// Don't rotate when the controller rotates, Let the controller only affect the camera.
 	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
+	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = false;
 
 	// Configure character movement 
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.2f;
