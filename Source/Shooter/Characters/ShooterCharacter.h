@@ -59,7 +59,22 @@ private:
 	 * Create LineTrace when character starts firing.
 	 * @param Barrel is Weapon's BarrelSocket Transform information.
 	 */
-	void SetBulletLineTrace(FTransform Barrel);
+	void SetBulletLineTrace(const FTransform Barrel);
+
+	/**
+	* Returns the size of the current viewport.
+	* @param ViewportSize for storing current viewport location.
+	*/
+	void GetCurrentSizeOfViewport(FVector2D& ViewportSize);
+
+	/**
+	* Returns true if deprojection was successful.
+	* @param CurrentViewportSize current viewport location.
+	* @param CrosshairWorldPosition corresponding 3D position in world space.
+	* @param CrosshairWorldDirection world space direction vector away from the camera at the given 2d point.
+	*/
+	bool GetScreenSpaceLocationOfCrosshairs(const FVector2D CurrentViewportSize, FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection);
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 	
