@@ -73,7 +73,7 @@ private:
 	* @param CrosshairWorldPosition corresponding 3D position in world space.
 	* @param CrosshairWorldDirection world space direction vector away from the camera at the given 2d point.
 	*/
-	bool GetScreenSpaceLocationOfCrosshairs(const FVector2D CurrentViewportSize, FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection);
+	bool GetScreenSpaceLocationOfCrosshairs(FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection);
 
 public:	
 	virtual void Tick(float DeltaTime) override;

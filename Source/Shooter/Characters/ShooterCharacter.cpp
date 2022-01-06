@@ -126,12 +126,9 @@ void AShooterCharacter::CreateFireMuzzleFlashParticle()
 
 void AShooterCharacter::SetBulletLineTrace(const FTransform Barrel)
 {
-	FVector2D ViewportSize;
-	GetCurrentSizeOfViewport(ViewportSize);
-
 	FVector CrosshairWorldPosition;
 	FVector CrosshairWorldDirection;
-	bool bScreenToWorld = GetScreenSpaceLocationOfCrosshairs(ViewportSize, CrosshairWorldPosition, CrosshairWorldDirection);
+	bool bScreenToWorld = GetScreenSpaceLocationOfCrosshairs(CrosshairWorldPosition, CrosshairWorldDirection);
 	if (bScreenToWorld)
 	{
 		FHitResult ScreenTraceHit;
@@ -150,6 +147,18 @@ void AShooterCharacter::SetBulletLineTrace(const FTransform Barrel)
 			}
 		}
 
+		// perform second trace, this time from the gun barrel
+		FHitResult WeaponTraceHit;
+		const FVector WeaponTraceStart = Barrel.GetLocation();
+		const FVector WeaponTraceEnd = BeamEndPoint;
+		GetWorld()->LineTraceSingleByChannel(WeaponTraceHit, WeaponTraceStart, WeaponTraceEnd, ECollisionChannel::ECC_Visibility);
+
+		// object between barrel and BeamEndPoint
+		if (WeaponTraceHit.bBlockingHit)
+		{
+			BeamEndPoint = WeaponTraceHit.Location;
+		}
+		
 		if (BeamParticles)
 		{
 			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticles, Barrel);
@@ -161,6 +170,17 @@ void AShooterCharacter::SetBulletLineTrace(const FTransform Barrel)
 	}
 }
 
+bool AShooterCharacter::GetScreenSpaceLocationOfCrosshairs(FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection)
+{
+	FVector2D ViewportSize;
+	GetCurrentSizeOfViewport(ViewportSize);
+
+	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	CrosshairLocation.Y -= 50.f;
+
+	return UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0), CrosshairLocation,CrosshairWorldPosition,CrosshairWorldDirection);	
+}
+
 void AShooterCharacter::GetCurrentSizeOfViewport(FVector2D& ViewportSize)
 {
 	if (GEngine && GEngine->GameViewport)
@@ -169,13 +189,6 @@ void AShooterCharacter::GetCurrentSizeOfViewport(FVector2D& ViewportSize)
 	}
 }
 
-bool AShooterCharacter::GetScreenSpaceLocationOfCrosshairs(const FVector2D CurrentViewportSize, FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection)
-{
-	FVector2D CrosshairLocation(CurrentViewportSize.X / 2.f, CurrentViewportSize.Y / 2.f);
-	CrosshairLocation.Y -= 50.f;
-
-	return UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0), CrosshairLocation,CrosshairWorldPosition,CrosshairWorldDirection);	
-}
 
 void AShooterCharacter::PlayFireAnimMontage()
 {
