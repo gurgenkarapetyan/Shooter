@@ -4,6 +4,7 @@
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Shooter/Characters/ShooterCharacter.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UShooterAnimInstance::NativeInitializeAnimation()
 {
@@ -14,18 +15,19 @@ void UShooterAnimInstance::NativeInitializeAnimation()
 
 void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 {
-	if (ShooterCharacter == nullptr)
+	if (!ShooterCharacter)
 	{
-		ShooterCharacter = Cast<AShooterCharacter>(TryGetPawnOwner());
+		return;
 	}
 
-	if (ShooterCharacter)
-	{
-		SetCharacterSpeed(Speed);
-		
-		bIsInAir = IsCharacterInTheAir();
-		bIsAccelerating = IsCharacterAccelerating();
-	}
+	SetCharacterSpeed(Speed);
+
+	bIsInAir = IsCharacterInTheAir();
+	bIsAccelerating = IsCharacterAccelerating();
+
+	FRotator AimRotation = ShooterCharacter->GetBaseAimRotation();
+	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(ShooterCharacter->GetVelocity());
+	MovementOffsetYaw = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation,AimRotation).Yaw;
 }
 
 void UShooterAnimInstance::SetCharacterSpeed(float& CharacterSpeed)
