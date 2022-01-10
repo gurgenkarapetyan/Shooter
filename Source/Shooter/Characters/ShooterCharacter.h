@@ -39,7 +39,6 @@ protected:
 	* @param Rate this is a normalized rate, i.e. 1.0 means 100% desired rate.
 	*/
 	void LookUpAtRate(float Rate);
-
 	
 	/**
 	* Rotate controller base on mouse X movement.
@@ -55,6 +54,8 @@ protected:
 	
 	/** Called when the fire button is pressed. */
 	void FireWeapon();
+	
+	void CalculateCrosshairSpread(float DeltaTime);
 private:
 	/** Setting some configuration for character movement. */
 	void SetCharacterMovementConfigurations();
@@ -111,6 +112,8 @@ public:
 	/** Returns aiming true/false. */
 	FORCEINLINE bool GetAiming() const { return bAiming; }
 	
+	UFUNCTION(BlueprintCallable)
+	float GetCrosshairSpreadMultiplier() const;
 private:
 	/** Camera boom positioning the camera behind the character. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Camera", meta=(AllowPrivateAccess = "true"))
@@ -192,6 +195,26 @@ private:
 	/** Interp speed when zooming. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat",  meta=(AllowPrivateAccess = "true"))
 	float ZoomInterpSpeed;
+
+	/** Determines the spread of the crosshairs. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Crosshairs", meta=(AllowPrivateAccess = "true"))
+	float CrosshairSpreadMultiplier;
+
+	/** Velocity component for crosshairs spread. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Crosshairs", meta=(AllowPrivateAccess = "true"))
+	float CrosshairVelocityFactor;
+
+	/** In air component for crosshairs spread. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Crosshairs", meta=(AllowPrivateAccess = "true"))
+	float CrosshariInAirFactor;
+
+	/** Aim component for crosshairs spread. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Crosshairs", meta=(AllowPrivateAccess = "true"))
+	float CrosshairAimFactor;
+
+	/** Shooting component for crosshairs spread. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Crosshairs", meta=(AllowPrivateAccess = "true"))
+	float CrosshairShootingFactor;
 	
 	/** True when aiming */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Combat", meta=(AllowPrivateAccess = "true"))

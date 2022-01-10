@@ -64,6 +64,7 @@ void AShooterCharacter::Tick(float DeltaTime)
 	
 	CameraInterpZoom(DeltaTime);
 	SetLookUpRates();
+	CalculateCrosshairSpread(DeltaTime);
 }
 
 void AShooterCharacter::SetCharacterMovementConfigurations()
@@ -115,6 +116,17 @@ void AShooterCharacter::SetLookUpRates()
 		BaseTurnRate = HipTurnRate;
 		BaseLookUpRate = HipLookUpRate;
 	}
+}
+
+void AShooterCharacter::CalculateCrosshairSpread(float DeltaTime)
+{
+	FVector2D WalkSpeedRange { 0.f, 600.f };
+	FVector2D VelocityMultiplierRange { 0.f, 1.0f };
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;
+	
+	CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, Velocity.Size());
+	CrosshairSpreadMultiplier = 0.5f + CrosshairVelocityFactor;
 }
 
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -306,4 +318,9 @@ void AShooterCharacter::PlayFireAnimMontage()
 		AnimInstance->Montage_Play(HipFireMontage);
 		AnimInstance->Montage_JumpToSection(FName("StartFire"));
 	}
+}
+
+float AShooterCharacter::GetCrosshairSpreadMultiplier() const
+{
+	return CrosshairSpreadMultiplier;
 }
