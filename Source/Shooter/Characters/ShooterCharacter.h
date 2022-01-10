@@ -67,6 +67,13 @@ private:
 	*/
 	void GetCurrentSizeOfViewport(FVector2D& ViewportSize);
 
+	/** Set bAiming to true or false with button press. */
+	void AimingButtonPressed();
+	void AimingButtonReleased();
+
+	/** Handle interpolation for zoom when aiming */
+	void CameraInterpZoom(float DeltaTime);
+	
 	/**
 	* Returns true if deprojection was successful.
 	* @param CurrentViewportSize current viewport location.
@@ -121,4 +128,21 @@ private:
 	/** Base look up/down rate in degree/seconds. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Camera", meta=(AllowPrivateAccess = "true"))
 	float BaseLookUpRate;
+
+	/** Default camera field of view value. */
+	float CameraDefaultFOV;
+	
+	/** Field of view value for when zoomed in. */
+	float CameraZoomedFOV;
+
+	/** Current Field of view this view. */
+	float CameraCurrentFOV;
+
+	/** Interp speed when zooming. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat",  meta=(AllowPrivateAccess = "true"))
+	float ZoomInterpSpeed;
+	
+	/** True when aiming */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Combat", meta=(AllowPrivateAccess = "true"))
+	bool bAiming;
 };
