@@ -33,6 +33,8 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 	{
 		LastMovementOffsetYaw = MovementOffsetYaw;
 	}
+
+	bAiming = ShooterCharacter->GetAiming();
 }
 
 void UShooterAnimInstance::SetCharacterSpeed(float& CharacterSpeed)

@@ -91,6 +91,9 @@ public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject. */
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	/** Returns aiming true/false. */
+	FORCEINLINE bool GetAiming() const { return bAiming; }
 	
 private:
 	/** Camera boom positioning the camera behind the character. */
