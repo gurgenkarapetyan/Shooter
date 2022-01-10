@@ -55,7 +55,14 @@ protected:
 	/** Called when the fire button is pressed. */
 	void FireWeapon();
 	
+	/** Calculate crosshair spread amount value */
 	void CalculateCrosshairSpread(float DeltaTime);
+	
+	void StartCrosshairBulletFire();
+	
+	UFUNCTION()
+	void FinishCrosshairBulletFire();
+	
 private:
 	/** Setting some configuration for character movement. */
 	void SetCharacterMovementConfigurations();
@@ -99,6 +106,27 @@ private:
 	*/
 	bool GetScreenSpaceLocationOfCrosshairs(FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection);
 
+	/**
+	*  Calculate crosshair in air factor
+	* @param DeltaTime .
+	* @param CrosshariInAir for calculating value of air factor.
+	*/
+	void CalculateCrosshairInAirFactor(float DeltaTime, float &CrosshariInAir);
+
+	/**
+	* Calculate crosshair aim factor.
+	* @param DeltaTime .
+	* @param CrosshairAim for calculating value of air factor.
+	*/
+	void CalculateCrosshairAimFactor(float DeltaTime, float &CrosshairAim);
+
+	/**
+	* Calculate crosshair firing factor.
+	* @param DeltaTime
+	* @param CrosshairShooting for calculating value of shooting factor.
+	*/
+	void CalculateCrosshairFiringFactor(float DeltaTime, float &CrosshairShooting);
+	
 public:	
 	virtual void Tick(float DeltaTime) override;
 	
@@ -114,6 +142,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	float GetCrosshairSpreadMultiplier() const;
+	
 private:
 	/** Camera boom positioning the camera behind the character. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Camera", meta=(AllowPrivateAccess = "true"))
@@ -219,4 +248,10 @@ private:
 	/** True when aiming */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Combat", meta=(AllowPrivateAccess = "true"))
 	bool bAiming;
+
+	float ShootTimeDuration;
+
+	bool bFiringBullet;
+
+	FTimerHandle  CrosshairShootTimer;
 };
