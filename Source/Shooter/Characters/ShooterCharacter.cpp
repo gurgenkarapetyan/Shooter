@@ -39,7 +39,11 @@ AShooterCharacter::AShooterCharacter() :
 	bAiming(false),
 	// Bullet fire timer variables
 	ShootTimeDuration(0.05f),
-	bFiringBullet(false)
+	bFiringBullet(false),
+	// Automatic fire variables
+	bShouldFire(true),
+	bFireButtonPressed(false),
+	AutomaticFireRate(0.1f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -191,7 +195,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Released, this, &ACharacter::StopJumping);
-	PlayerInputComponent->BindAction(TEXT("FireButton"), IE_Pressed, this, &AShooterCharacter::FireWeapon);
+	PlayerInputComponent->BindAction(TEXT("FireButton"), IE_Pressed, this, &AShooterCharacter::FireButtonPressed);
+	PlayerInputComponent->BindAction(TEXT("FireButton"), IE_Released, this, &AShooterCharacter::FireButtonReleased);
 	PlayerInputComponent->BindAction(TEXT("AimingButton"), IE_Pressed, this, &AShooterCharacter::AimingButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("AimingButton"), IE_Released, this, &AShooterCharacter::AimingButtonReleased);
 }
@@ -262,6 +267,36 @@ void AShooterCharacter::LookUp(float Value)
 	}
 
 	AddControllerPitchInput(Value * LookUpScaleFactor);
+}
+
+void AShooterCharacter::FireButtonPressed()
+{
+	bFireButtonPressed = true;
+	StartFireTimer();
+}
+
+void AShooterCharacter::FireButtonReleased()
+{
+	bFireButtonPressed = false;
+}
+
+void AShooterCharacter::StartFireTimer()
+{
+	if (bShouldFire)
+	{
+		FireWeapon();
+		bShouldFire = false;
+		GetWorldTimerManager().SetTimer(AutoFireTimer, this, &AShooterCharacter::AutoFireReset, AutomaticFireRate);
+	}
+}
+
+void AShooterCharacter::AutoFireReset()
+{
+	bShouldFire = true;
+	if (bFireButtonPressed)
+	{
+		StartFireTimer();
+	}
 }
 
 void AShooterCharacter::FireWeapon()
@@ -379,7 +414,6 @@ void AShooterCharacter::FinishCrosshairBulletFire()
 {
 	bFiringBullet = false;
 }
-
 
 float AShooterCharacter::GetCrosshairSpreadMultiplier() const
 {

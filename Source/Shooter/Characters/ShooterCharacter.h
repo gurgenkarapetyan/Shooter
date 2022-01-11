@@ -63,6 +63,13 @@ protected:
 	UFUNCTION()
 	void FinishCrosshairBulletFire();
 	
+	void FireButtonPressed();
+	void FireButtonReleased();
+
+	void StartFireTimer();
+	
+	UFUNCTION()
+	void AutoFireReset();
 private:
 	/** Setting some configuration for character movement. */
 	void SetCharacterMovementConfigurations();
@@ -249,6 +256,18 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Combat", meta=(AllowPrivateAccess = "true"))
 	bool bAiming;
 
+	/** Left mouse button or right console trigger pressed. */
+	bool bFireButtonPressed;
+	
+	/** True when we can fire. False waiting for the timer. */
+	bool bShouldFire;
+	
+	/** Rate of automatic gun fire. */
+	float AutomaticFireRate;
+
+	/** Sets a timer between gunshots. */
+	FTimerHandle AutoFireTimer;
+	
 	float ShootTimeDuration;
 
 	bool bFiringBullet;
