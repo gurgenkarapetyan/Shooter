@@ -3,12 +3,14 @@
 #include "ShooterCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Sound/SoundCue.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Shooter/Actors/Item.h"
 
 AShooterCharacter::AShooterCharacter() :
 	// Base Rates for turning/looking up
@@ -78,6 +80,18 @@ void AShooterCharacter::Tick(float DeltaTime)
 	CameraInterpZoom(DeltaTime);
 	SetLookUpRates();
 	CalculateCrosshairSpread(DeltaTime);
+
+	FHitResult ItemTraceResult;
+	TraceUnderCrosshairs(ItemTraceResult);
+	if (ItemTraceResult.bBlockingHit)
+	{
+		AItem* HitItem = Cast<AItem>(ItemTraceResult.Actor);
+
+		if (HitItem && HitItem->GetPickUpWidget())
+		{
+			HitItem->GetPickUpWidget()->SetVisibility(true);
+		}
+	}
 }
 
 void AShooterCharacter::SetCharacterMovementConfigurations()
@@ -418,4 +432,30 @@ void AShooterCharacter::FinishCrosshairBulletFire()
 float AShooterCharacter::GetCrosshairSpreadMultiplier() const
 {
 	return CrosshairSpreadMultiplier;
+}
+
+bool AShooterCharacter::TraceUnderCrosshairs(FHitResult& OutHitResult)
+{
+	FVector2D ViewportSize;
+	FVector CrosshairWorldPosition;
+	FVector CrosshairWorldDirection;
+	GetCurrentSizeOfViewport(ViewportSize);
+	
+	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0), CrosshairLocation,CrosshairWorldPosition,CrosshairWorldDirection);
+
+	if (bScreenToWorld)
+	{
+		const FVector Start { CrosshairWorldPosition };
+		const FVector End {  Start + CrosshairWorldDirection * 50000.f };
+		GetWorld()->LineTraceSingleByChannel(OutHitResult, Start, End, ECollisionChannel::ECC_Visibility);
+
+		if (OutHitResult.bBlockingHit)
+		{
+			return true;
+		}
+	}
+	
+	return false;
 }

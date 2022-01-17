@@ -3,10 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/BoxComponent.h"
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
 
+class UBoxComponent;
+class UWidgetComponent;
 
 UCLASS()
 class SHOOTER_API AItem : public AActor
@@ -25,6 +26,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	FORCEINLINE UWidgetComponent* GetPickUpWidget() const { return PickUpWidget; }
 private:
 	/** Skeleton mesh for the item. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Item Properties", meta = (AllowPrivateAccess="true"))
@@ -33,4 +35,8 @@ private:
 	/** Line trace collides with box to show HUD widgets. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Item Properties", meta = (AllowPrivateAccess="true"))
 	UBoxComponent* CollisionBox;
+
+	/** Pop up widget for the player when looks at the item . */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Item Properties", meta = (AllowPrivateAccess="true"))
+	UWidgetComponent* PickUpWidget;
 };

@@ -70,6 +70,9 @@ protected:
 	
 	UFUNCTION()
 	void AutoFireReset();
+
+	/** Line Trace for items under the crosshairs */
+	bool TraceUnderCrosshairs(FHitResult& OutHitResult);
 private:
 	/** Setting some configuration for character movement. */
 	void SetCharacterMovementConfigurations();
