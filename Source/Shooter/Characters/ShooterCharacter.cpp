@@ -108,16 +108,6 @@ void AShooterCharacter::SetCharacterMovementConfigurations()
 	GetCharacterMovement()->AirControl = 0.2f;
 }
 
-void AShooterCharacter::AimingButtonPressed()
-{
-	bAiming = true;
-}
-
-void AShooterCharacter::AimingButtonReleased()
-{
-	bAiming = false;
-}
-
 void AShooterCharacter::CameraInterpZoom(float DeltaTime)
 {
 	if (bAiming)
@@ -427,6 +417,16 @@ void AShooterCharacter::StartCrosshairBulletFire()
 void AShooterCharacter::FinishCrosshairBulletFire()
 {
 	bFiringBullet = false;
+}
+
+void AShooterCharacter::AimingButtonPressed()
+{
+	bAiming = true;
+}
+
+void AShooterCharacter::AimingButtonReleased()
+{
+	bAiming = false;
 }
 
 float AShooterCharacter::GetCrosshairSpreadMultiplier() const
