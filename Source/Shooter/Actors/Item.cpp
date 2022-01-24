@@ -8,7 +8,8 @@
 
 // Sets default values
 AItem::AItem() :
-	ItemName(FString("Default"))
+	ItemName(FString("Default")),
+	ItemCount(0)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
