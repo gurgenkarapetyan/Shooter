@@ -45,7 +45,9 @@ AShooterCharacter::AShooterCharacter() :
 	// Automatic fire variables
 	bShouldFire(true),
 	bFireButtonPressed(false),
-	AutomaticFireRate(0.1f)
+	AutomaticFireRate(0.1f),
+	// Item trace variables
+	bShouldTraceForItems(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -80,18 +82,7 @@ void AShooterCharacter::Tick(float DeltaTime)
 	CameraInterpZoom(DeltaTime);
 	SetLookUpRates();
 	CalculateCrosshairSpread(DeltaTime);
-
-	FHitResult ItemTraceResult;
-	TraceUnderCrosshairs(ItemTraceResult);
-	if (ItemTraceResult.bBlockingHit)
-	{
-		AItem* HitItem = Cast<AItem>(ItemTraceResult.Actor);
-
-		if (HitItem && HitItem->GetPickUpWidget())
-		{
-			HitItem->GetPickUpWidget()->SetVisibility(true);
-		}
-	}
+	TraceForItems();
 }
 
 void AShooterCharacter::SetCharacterMovementConfigurations()
@@ -183,6 +174,37 @@ void AShooterCharacter::CalculateCrosshairFiringFactor(float DeltaTime, float& C
 	else
 	{
 		CrosshariInAir = FMath::FInterpTo(CrosshairShootingFactor,  0.f, DeltaTime, 60.f);	
+	}
+}
+
+void AShooterCharacter::TraceForItems()
+{
+	if (bShouldTraceForItems)
+	{
+		FHitResult ItemTraceResult;
+		TraceUnderCrosshairs(ItemTraceResult);
+		if (ItemTraceResult.bBlockingHit)
+		{
+			AItem* HitItem = Cast<AItem>(ItemTraceResult.Actor);
+
+			if (HitItem && HitItem->GetPickUpWidget())
+			{
+				HitItem->GetPickUpWidget()->SetVisibility(true);
+			}
+
+			if (TraceHitItemLastFrame)
+			{
+				if (HitItem != TraceHitItemLastFrame)
+				{
+					TraceHitItemLastFrame->GetPickUpWidget()->SetVisibility(false);
+				}
+			}
+			TraceHitItemLastFrame = HitItem;
+		}
+	}
+	else if (TraceHitItemLastFrame)
+	{
+		TraceHitItemLastFrame->GetPickUpWidget()->SetVisibility(false);
 	}
 }
 
@@ -429,6 +451,20 @@ void AShooterCharacter::AimingButtonReleased()
 	bAiming = false;
 }
 
+void AShooterCharacter::UpdateOverlappedItemCountValue(int8 Amount)
+{
+	if (OverlappedItemCount + Amount <= 0)
+	{
+		OverlappedItemCount = 0;
+		bShouldTraceForItems = false;
+	}
+	else
+	{
+		OverlappedItemCount += Amount;
+		bShouldTraceForItems = true;
+	}
+}
+
 float AShooterCharacter::GetCrosshairSpreadMultiplier() const
 {
 	return CrosshairSpreadMultiplier;
@@ -436,15 +472,9 @@ float AShooterCharacter::GetCrosshairSpreadMultiplier() const
 
 bool AShooterCharacter::TraceUnderCrosshairs(FHitResult& OutHitResult)
 {
-	FVector2D ViewportSize;
 	FVector CrosshairWorldPosition;
 	FVector CrosshairWorldDirection;
-	GetCurrentSizeOfViewport(ViewportSize);
-	
-	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
-
-	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0), CrosshairLocation,CrosshairWorldPosition,CrosshairWorldDirection);
-
+	bool bScreenToWorld = GetScreenSpaceLocationOfCrosshairs(CrosshairWorldPosition, CrosshairWorldDirection);
 	if (bScreenToWorld)
 	{
 		const FVector Start { CrosshairWorldPosition };
