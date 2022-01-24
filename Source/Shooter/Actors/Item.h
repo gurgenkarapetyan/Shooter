@@ -52,4 +52,8 @@ private:
 	/** Enable item tracing when overlapped. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Item Properties", meta = (AllowPrivateAccess="true"))
 	USphereComponent* AreaShpere;
+
+	/** The name which appears on Pickup widget*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Item Properties", meta = (AllowPrivateAccess="true"))
+	FString ItemName;
 };
