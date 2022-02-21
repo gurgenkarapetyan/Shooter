@@ -111,9 +111,6 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 		return;
 	}
 
-	WeaponToEquip->GetAreaSphere()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	WeaponToEquip->GetCollisionBox()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	
 	const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("RightHandSocket"));
 	if (!HandSocket)
 	{
@@ -121,6 +118,7 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 	}
 	HandSocket->AttachActor(WeaponToEquip, GetMesh());
 	EquippedWeapon = WeaponToEquip;
+	EquippedWeapon->SetItemState(EItemState::EIS_Equipped);
 }
 
 AWeapon* AShooterCharacter::SpawnDefaultWeapon()
@@ -242,6 +240,27 @@ void AShooterCharacter::TraceForItems()
 	}
 }
 
+bool AShooterCharacter::TraceUnderCrosshairs(FHitResult& OutHitResult)
+{
+	FVector CrosshairWorldPosition;
+	FVector CrosshairWorldDirection;
+	bool bScreenToWorld = GetScreenSpaceLocationOfCrosshairs(CrosshairWorldPosition, CrosshairWorldDirection);
+	if (bScreenToWorld)
+	{
+		const FVector Start { CrosshairWorldPosition };
+		const FVector End {  Start + CrosshairWorldDirection * 50000.f };
+		GetWorld()->LineTraceSingleByChannel(OutHitResult, Start, End, ECollisionChannel::ECC_Visibility);
+
+		if (OutHitResult.bBlockingHit)
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -255,10 +274,15 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Released, this, &ACharacter::StopJumping);
+	
 	PlayerInputComponent->BindAction(TEXT("FireButton"), IE_Pressed, this, &AShooterCharacter::FireButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("FireButton"), IE_Released, this, &AShooterCharacter::FireButtonReleased);
+	
 	PlayerInputComponent->BindAction(TEXT("AimingButton"), IE_Pressed, this, &AShooterCharacter::AimingButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("AimingButton"), IE_Released, this, &AShooterCharacter::AimingButtonReleased);
+	
+	PlayerInputComponent->BindAction(TEXT("Select"), IE_Pressed, this, &AShooterCharacter::SelectButtonPressed);
+	PlayerInputComponent->BindAction(TEXT("Select"), IE_Released, this, &AShooterCharacter::SelectButtonReleased);
 }
 
 void AShooterCharacter::MoveForward(float Value)
@@ -485,6 +509,28 @@ void AShooterCharacter::AimingButtonReleased()
 	bAiming = false;
 }
 
+void AShooterCharacter::SelectButtonPressed()
+{
+	DropWeapon();
+}
+
+void AShooterCharacter::DropWeapon()
+{
+	if (!EquippedWeapon)
+	{
+		return;
+	}
+
+	FDetachmentTransformRules DetachmentTransformRules(EDetachmentRule::KeepWorld, true);
+	EquippedWeapon->GetItemMesh()->DetachFromComponent(DetachmentTransformRules);
+	EquippedWeapon->SetItemState(EItemState::EIS_Falling);
+}
+
+void AShooterCharacter::SelectButtonReleased()
+{
+	
+}
+
 void AShooterCharacter::UpdateOverlappedItemCountValue(int8 Amount)
 {
 	if (OverlappedItemCount + Amount <= 0)
@@ -502,24 +548,4 @@ void AShooterCharacter::UpdateOverlappedItemCountValue(int8 Amount)
 float AShooterCharacter::GetCrosshairSpreadMultiplier() const
 {
 	return CrosshairSpreadMultiplier;
-}
-
-bool AShooterCharacter::TraceUnderCrosshairs(FHitResult& OutHitResult)
-{
-	FVector CrosshairWorldPosition;
-	FVector CrosshairWorldDirection;
-	bool bScreenToWorld = GetScreenSpaceLocationOfCrosshairs(CrosshairWorldPosition, CrosshairWorldDirection);
-	if (bScreenToWorld)
-	{
-		const FVector Start { CrosshairWorldPosition };
-		const FVector End {  Start + CrosshairWorldDirection * 50000.f };
-		GetWorld()->LineTraceSingleByChannel(OutHitResult, Start, End, ECollisionChannel::ECC_Visibility);
-
-		if (OutHitResult.bBlockingHit)
-		{
-			return true;
-		}
-	}
-	
-	return false;
 }

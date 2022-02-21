@@ -10,7 +10,8 @@
 AItem::AItem() :
 	ItemName(FString("Default")),
 	ItemCount(0),
-	ItemRarity(EItemRarity::EIR_Common)
+	ItemRarity(EItemRarity::EIR_Common),
+	ItemState(EItemState::EIS_Pickup)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -25,8 +26,8 @@ AItem::AItem() :
 	PickUpWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Pick Up Widget"));
 	PickUpWidget->SetupAttachment(GetRootComponent());
 
-	AreaShpere = CreateDefaultSubobject<USphereComponent>(TEXT("Area Sphere"));
-	AreaShpere->SetupAttachment(GetRootComponent());
+	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Area Sphere"));
+	AreaSphere->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
@@ -39,10 +40,11 @@ void AItem::BeginPlay()
 		PickUpWidget->SetVisibility(false);
 	}
 	
+	AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnSphereOverlap);
+	AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AItem::OnSphereEndOverlap);
+	
 	SetActiveStart();
-
-	AreaShpere->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnSphereOverlap);
-	AreaShpere->OnComponentEndOverlap.AddDynamic(this, &AItem::OnSphereEndOverlap);
+	SetItemProperties(ItemState);
 }
 
 // Called every frame
@@ -50,6 +52,30 @@ void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	if (OtherActor)
+	{
+		AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(OtherActor);
+		if (ShooterCharacter)
+		{
+			ShooterCharacter->UpdateOverlappedItemCountValue(1);
+		}
+	}
+}
+
+void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor)
+	{
+		AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(OtherActor);
+		if (ShooterCharacter)
+		{
+			ShooterCharacter->UpdateOverlappedItemCountValue(-1);
+		}
+	}
 }
 
 void AItem::SetActiveStart()
@@ -89,27 +115,49 @@ void AItem::SetActiveStart()
 	}
 }
 
-void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+void AItem::SetItemProperties(EItemState State)
 {
-	if (OtherActor)
+	switch (State)
 	{
-		AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(OtherActor);
-		if (ShooterCharacter)
-		{
-			ShooterCharacter->UpdateOverlappedItemCountValue(1);
-		}
+	case EItemState::EIS_Pickup:
+		ItemMesh->SetSimulatePhysics(false);
+		ItemMesh->SetEnableGravity(false);
+		ItemMesh->SetVisibility(true);
+		ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+		CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+		CollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		break;
+	case EItemState::EIS_Equipped:
+		ItemMesh->SetSimulatePhysics(false);
+		ItemMesh->SetEnableGravity(false);
+		ItemMesh->SetVisibility(true);
+		ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+	case EItemState::EIS_Falling:
+		ItemMesh->SetSimulatePhysics(true);
+		ItemMesh->SetEnableGravity(true);
+		ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		ItemMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+		ItemMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		break;
 	}
 }
 
-void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void AItem::SetItemState(EItemState State)
 {
-	if (OtherActor)
-	{
-		AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(OtherActor);
-		if (ShooterCharacter)
-		{
-			ShooterCharacter->UpdateOverlappedItemCountValue(-1);
-		}
-	}
+	ItemState = State;
+	SetItemProperties(State);
 }
-
