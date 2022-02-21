@@ -3,6 +3,8 @@
 #include "ShooterCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -11,6 +13,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Shooter/Actors/Item.h"
+#include "Shooter/Actors/Weapon.h"
 
 AShooterCharacter::AShooterCharacter() :
 	// Base Rates for turning/looking up
@@ -73,6 +76,8 @@ void AShooterCharacter::BeginPlay()
 		CameraDefaultFOV = GetFollowCamera()->FieldOfView;
 		CameraCurrentFOV = CameraDefaultFOV;
 	}
+
+	EquipWeapon(SpawnDefaultWeapon());
 }
 
 void AShooterCharacter::Tick(float DeltaTime)
@@ -97,6 +102,35 @@ void AShooterCharacter::SetCharacterMovementConfigurations()
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.2f;
+}
+
+void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
+{
+	if (!WeaponToEquip)
+	{
+		return;
+	}
+
+	WeaponToEquip->GetAreaSphere()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	WeaponToEquip->GetCollisionBox()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	
+	const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("RightHandSocket"));
+	if (!HandSocket)
+	{
+		return;
+	}
+	HandSocket->AttachActor(WeaponToEquip, GetMesh());
+	EquippedWeapon = WeaponToEquip;
+}
+
+AWeapon* AShooterCharacter::SpawnDefaultWeapon()
+{
+	if (!DefaultWeaponClass)
+	{	
+		return nullptr;	
+	}
+
+	return GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
 }
 
 void AShooterCharacter::CameraInterpZoom(float DeltaTime)

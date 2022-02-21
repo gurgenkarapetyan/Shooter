@@ -34,7 +34,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	FORCEINLINE UWidgetComponent* GetPickUpWidget() const { return PickUpWidget; }
-	
+	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaShpere; }
+	FORCEINLINE UBoxComponent* GetCollisionBox() const { return CollisionBox; }
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
