@@ -516,6 +516,7 @@ void AShooterCharacter::SelectButtonPressed()
 
 void AShooterCharacter::DropWeapon()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Hello"));
 	if (!EquippedWeapon)
 	{
 		return;
@@ -523,7 +524,9 @@ void AShooterCharacter::DropWeapon()
 
 	FDetachmentTransformRules DetachmentTransformRules(EDetachmentRule::KeepWorld, true);
 	EquippedWeapon->GetItemMesh()->DetachFromComponent(DetachmentTransformRules);
+
 	EquippedWeapon->SetItemState(EItemState::EIS_Falling);
+	EquippedWeapon->ThrowWeapon();
 }
 
 void AShooterCharacter::SelectButtonReleased()
