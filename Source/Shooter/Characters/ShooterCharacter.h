@@ -91,6 +91,9 @@ protected:
 	void SelectButtonPressed();
 	void SelectButtonReleased();
 	
+	/** Drops currently equipped Weapon and Equips TraceHitItem */
+	void SwapWeapon(AWeapon* WeaponToSwap);
+
 private:
 	/** Setting some configuration for character movement. */
 	void SetCharacterMovementConfigurations();
@@ -175,6 +178,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	float GetCrosshairSpreadMultiplier() const;
+
+	FVector GetCameraInterpLocation();
+
+	void GetPickupItem(AItem* Item);
 	
 private:
 	/** Camera boom positioning the camera behind the character. */
@@ -317,4 +324,16 @@ private:
 	/** Set this in Blueprints for the default Weapon class. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Combat", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AWeapon> DefaultWeaponClass;
+	
+	/** The item currently hit by our trace in TraceForItems (could be null) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	AItem* TraceHitItem;
+	
+	/** Distance outward from the camera for the interp destination. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items", meta = (AllowPrivateAccess = "true"))
+	float CameraInterpDistance;
+	
+	/** Distance upward from the camera for the interp destination. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items", meta = (AllowPrivateAccess = "true"))
+	float CameraInterpElevation;
 };

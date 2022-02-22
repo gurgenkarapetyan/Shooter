@@ -3,8 +3,6 @@
 #include "ShooterCharacter.h"
 
 #include "Camera/CameraComponent.h"
-#include "Components/BoxComponent.h"
-#include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -50,7 +48,9 @@ AShooterCharacter::AShooterCharacter() :
 	bFireButtonPressed(false),
 	AutomaticFireRate(0.1f),
 	// Item trace variables
-	bShouldTraceForItems(false)
+	bShouldTraceForItems(false),
+	CameraInterpDistance(250.f),
+	CameraInterpElevation(65.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -112,13 +112,12 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 	}
 
 	const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("RightHandSocket"));
-	if (!HandSocket)
+	if (HandSocket)
 	{
-		return;
+		HandSocket->AttachActor(WeaponToEquip, GetMesh());
+		EquippedWeapon = WeaponToEquip;
+		EquippedWeapon->SetItemState(EItemState::EIS_Equipped);
 	}
-	HandSocket->AttachActor(WeaponToEquip, GetMesh());
-	EquippedWeapon = WeaponToEquip;
-	EquippedWeapon->SetItemState(EItemState::EIS_Equipped);
 }
 
 AWeapon* AShooterCharacter::SpawnDefaultWeapon()
@@ -217,21 +216,21 @@ void AShooterCharacter::TraceForItems()
 		TraceUnderCrosshairs(ItemTraceResult);
 		if (ItemTraceResult.bBlockingHit)
 		{
-			AItem* HitItem = Cast<AItem>(ItemTraceResult.Actor);
+			TraceHitItem = Cast<AItem>(ItemTraceResult.Actor);
 
-			if (HitItem && HitItem->GetPickUpWidget())
+			if (TraceHitItem && TraceHitItem->GetPickUpWidget())
 			{
-				HitItem->GetPickUpWidget()->SetVisibility(true);
+				TraceHitItem->GetPickUpWidget()->SetVisibility(true);
 			}
 
 			if (TraceHitItemLastFrame)
 			{
-				if (HitItem != TraceHitItemLastFrame)
+				if (TraceHitItem != TraceHitItemLastFrame)
 				{
 					TraceHitItemLastFrame->GetPickUpWidget()->SetVisibility(false);
 				}
 			}
-			TraceHitItemLastFrame = HitItem;
+			TraceHitItemLastFrame = TraceHitItem;
 		}
 	}
 	else if (TraceHitItemLastFrame)
@@ -511,12 +510,14 @@ void AShooterCharacter::AimingButtonReleased()
 
 void AShooterCharacter::SelectButtonPressed()
 {
-	DropWeapon();
+	if (TraceHitItem)
+	{
+		TraceHitItem->StartItemCurve(this);
+	}
 }
 
 void AShooterCharacter::DropWeapon()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Hello"));
 	if (!EquippedWeapon)
 	{
 		return;
@@ -551,4 +552,27 @@ void AShooterCharacter::UpdateOverlappedItemCountValue(int8 Amount)
 float AShooterCharacter::GetCrosshairSpreadMultiplier() const
 {
 	return CrosshairSpreadMultiplier;
+}
+
+FVector AShooterCharacter::GetCameraInterpLocation()
+{
+	const FVector CameraWorldLocation{ FollowCamera->GetComponentLocation() };
+	const FVector CameraForward{ FollowCamera->GetForwardVector() };
+
+	return CameraWorldLocation + CameraForward * CameraInterpDistance + FVector(0.f, 0.f, CameraInterpElevation);
+}
+
+void AShooterCharacter::GetPickupItem(AItem* Item)
+{
+	auto Weapon = Cast<AWeapon>(Item);
+	if (Weapon)
+	{
+		SwapWeapon(Weapon);
+	}
+}
+
+void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
+{
+	DropWeapon();
+	EquipWeapon(WeaponToSwap);
 }
