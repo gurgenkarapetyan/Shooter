@@ -129,6 +129,9 @@ protected:
 
 	/** Initialize the Ammo Map with ammo values */
 	void InitializeAmmoMap();
+
+	/** Check to make sure out weapon has ammo. */
+	bool WeaponHasAmmo();
 private:
 	/** Setting some configuration for character movement. */
 	void SetCharacterMovementConfigurations();

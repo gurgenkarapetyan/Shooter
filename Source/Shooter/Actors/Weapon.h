@@ -21,7 +21,11 @@ public:
 
 	/** Adds an impulse to the weapon. */
 	void ThrowWeapon();
+
+	/** Called from Character class when firing weapon. */
+	void DecrementAmmo();
 	
+	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 protected:
 	void StopFalling();
 	
@@ -29,4 +33,8 @@ private:
 	FTimerHandle ThrowWeaponTimer;
 	float ThrowWeaponTime;
 	bool bFalling;
+
+	/** Ammo count for this Weapon */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon properties", meta = (AllowPrivateAccess = "true"))
+	int32 Ammo;
 };

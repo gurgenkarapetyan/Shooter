@@ -18,6 +18,7 @@ public:
 	AShooterPlayerController();
 
 	virtual void BeginPlay() override;
+	
 private:
 	/** Reference to the Overall HUD Overlay Blueprint Class. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets", meta = (AllowPrivateAccess = "true"))

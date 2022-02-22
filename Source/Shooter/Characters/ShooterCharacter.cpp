@@ -364,8 +364,21 @@ void AShooterCharacter::LookUp(float Value)
 
 void AShooterCharacter::FireButtonPressed()
 {
-	bFireButtonPressed = true;
-	StartFireTimer();
+	if (WeaponHasAmmo())
+	{
+		bFireButtonPressed = true;
+		StartFireTimer();
+	}
+}
+
+bool AShooterCharacter::WeaponHasAmmo()
+{
+	if (!EquippedWeapon)
+	{
+		return false;	
+	}
+
+	return (EquippedWeapon->GetAmmo() > 0);
 }
 
 void AShooterCharacter::FireButtonReleased()
@@ -385,6 +398,11 @@ void AShooterCharacter::StartFireTimer()
 
 void AShooterCharacter::AutoFireReset()
 {
+	if (!WeaponHasAmmo())
+	{
+		return;
+	}
+	
 	bShouldFire = true;
 	if (bFireButtonPressed)
 	{
@@ -398,6 +416,10 @@ void AShooterCharacter::FireWeapon()
 	CreateFireMuzzleFlashParticle();
 	PlayFireAnimMontage();
 	StartCrosshairBulletFire();
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->DecrementAmmo();
+	}
 }
 
 void AShooterCharacter::PlayFireSoundCue()
@@ -410,10 +432,15 @@ void AShooterCharacter::PlayFireSoundCue()
 
 void AShooterCharacter::CreateFireMuzzleFlashParticle()
 {
-	const USkeletalMeshSocket* BarrelSocket = GetMesh()->GetSocketByName("BarrelSocket");
+	if (!EquippedWeapon)
+	{
+		return;
+	}
+	
+	const USkeletalMeshSocket* BarrelSocket = EquippedWeapon->GetItemMesh()->GetSocketByName("BarrelSocket");
 	if (BarrelSocket)
 	{
-		const FTransform SocketTransform = BarrelSocket->GetSocketTransform(GetMesh());
+		const FTransform SocketTransform = BarrelSocket->GetSocketTransform(EquippedWeapon->GetItemMesh());
 		if (MuzzleFlash)
 		{
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);;
