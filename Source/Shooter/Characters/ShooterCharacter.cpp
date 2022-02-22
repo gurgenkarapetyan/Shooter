@@ -50,7 +50,10 @@ AShooterCharacter::AShooterCharacter() :
 	// Item trace variables
 	bShouldTraceForItems(false),
 	CameraInterpDistance(250.f),
-	CameraInterpElevation(65.f)
+	CameraInterpElevation(65.f),
+	// Starting ammo amounts 
+	Starting9mmAmmo(85),
+	StartingARAmmo(120)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -78,6 +81,7 @@ void AShooterCharacter::BeginPlay()
 	}
 
 	EquipWeapon(SpawnDefaultWeapon());
+	InitializeAmmoMap();
 }
 
 void AShooterCharacter::Tick(float DeltaTime)
@@ -118,6 +122,12 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 		EquippedWeapon = WeaponToEquip;
 		EquippedWeapon->SetItemState(EItemState::EIS_Equipped);
 	}
+}
+
+void AShooterCharacter::InitializeAmmoMap()
+{
+	AmmoMap.Add(EAmmoType::EAT_9mm, Starting9mmAmmo);
+	AmmoMap.Add(EAmmoType::EAT_AR, StartingARAmmo);
 }
 
 AWeapon* AShooterCharacter::SpawnDefaultWeapon()
@@ -532,7 +542,7 @@ void AShooterCharacter::DropWeapon()
 
 void AShooterCharacter::SelectButtonReleased()
 {
-	
+	TraceHitItem = nullptr;
 }
 
 void AShooterCharacter::UpdateOverlappedItemCountValue(int8 Amount)
@@ -565,10 +575,12 @@ FVector AShooterCharacter::GetCameraInterpLocation()
 void AShooterCharacter::GetPickupItem(AItem* Item)
 {
 	auto Weapon = Cast<AWeapon>(Item);
-	if (Weapon)
+	if (!Weapon)
 	{
-		SwapWeapon(Weapon);
+		UE_LOG(LogTemp, Warning, TEXT("HERE"));
 	}
+	SwapWeapon(Weapon);
+
 }
 
 void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)

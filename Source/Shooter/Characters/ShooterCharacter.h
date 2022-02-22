@@ -13,6 +13,15 @@ class UParticleSystem;
 class AItem;
 class AWeapon;
 
+UENUM(BlueprintType)
+enum class EAmmoType : uint8
+{
+	EAT_9mm UMETA(DisplayName = "9mm"),
+	EAT_AR UMETA(DisplayName = "Assault Rifle"),
+	
+	EAT_MAX UMETA(DisplayName = "Default Max"),
+};
+
 UCLASS()
 class SHOOTER_API AShooterCharacter : public ACharacter
 {
@@ -21,6 +30,30 @@ class SHOOTER_API AShooterCharacter : public ACharacter
 public:
 	AShooterCharacter();
 
+	virtual void Tick(float DeltaTime) override;
+	
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	/** Returns CameraBoom subobject. */
+	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	/** Returns FollowCamera subobject. */
+	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	/** Returns aiming true/false. */
+	FORCEINLINE bool GetAiming() const { return bAiming; }
+	
+	FORCEINLINE int8 GetOverlappedItemCount() const { return OverlappedItemCount; }
+
+	/** Adds/Subtracts to/from OverlappedItemCount and updates bShouldTraceForItems*/
+	void UpdateOverlappedItemCountValue(int8 Amount);
+	
+	UFUNCTION(BlueprintCallable)
+	float GetCrosshairSpreadMultiplier() const;
+
+	FVector GetCameraInterpLocation();
+
+	void GetPickupItem(AItem* Item);
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -94,6 +127,8 @@ protected:
 	/** Drops currently equipped Weapon and Equips TraceHitItem */
 	void SwapWeapon(AWeapon* WeaponToSwap);
 
+	/** Initialize the Ammo Map with ammo values */
+	void InitializeAmmoMap();
 private:
 	/** Setting some configuration for character movement. */
 	void SetCharacterMovementConfigurations();
@@ -157,31 +192,6 @@ private:
 	* @param CrosshairShooting for calculating value of shooting factor.
 	*/
 	void CalculateCrosshairFiringFactor(float DeltaTime, float &CrosshairShooting);
-	
-public:	
-	virtual void Tick(float DeltaTime) override;
-	
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	/** Returns CameraBoom subobject. */
-	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject. */
-	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
-	/** Returns aiming true/false. */
-	FORCEINLINE bool GetAiming() const { return bAiming; }
-	
-	FORCEINLINE int8 GetOverlappedItemCount() const { return OverlappedItemCount; }
-
-	/** Adds/Subtracts to/from OverlappedItemCount and updates bShouldTraceForItems*/
-	void UpdateOverlappedItemCountValue(int8 Amount);
-	
-	UFUNCTION(BlueprintCallable)
-	float GetCrosshairSpreadMultiplier() const;
-
-	FVector GetCameraInterpLocation();
-
-	void GetPickupItem(AItem* Item);
 	
 private:
 	/** Camera boom positioning the camera behind the character. */
@@ -336,4 +346,16 @@ private:
 	/** Distance upward from the camera for the interp destination. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Items", meta = (AllowPrivateAccess = "true"))
 	float CameraInterpElevation;
+
+	/** Map to keep track of ammo of the different ammo types. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Items", meta = (AllowPrivateAccess = "true"))
+	TMap<EAmmoType, int32> AmmoMap;
+
+	/** Starting amount of 9mm ammo */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Items", meta = (AllowPrivateAccess = "true"))
+	int32 Starting9mmAmmo;
+
+	/** Starting amount of Assault Rifle ammo */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Items", meta = (AllowPrivateAccess = "true"))
+	int32 StartingARAmmo;
 };
