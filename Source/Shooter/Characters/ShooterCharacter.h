@@ -22,6 +22,15 @@ enum class EAmmoType : uint8
 	EAT_MAX UMETA(DisplayName = "Default Max"),
 };
 
+UENUM(BlueprintType)
+enum class ECombatState : uint8
+{
+	ECS_Unoccupied UMETA(DisplayName = "Unoccupied"),
+	ECS_FireTimerInProgress UMETA(DisplayName = "FireTimerInProgress"),
+	ECS_Reloading UMETA(DisplayName = "Reloading"),
+
+	ECS_NAX UMETA(DisplayName = "DefaultMAX")
+};
 UCLASS()
 class SHOOTER_API AShooterCharacter : public ACharacter
 {
@@ -106,6 +115,15 @@ protected:
 	UFUNCTION()
 	void AutoFireReset();
 
+	/** Bound to the R key. */
+	void ReloadButtonPressed();
+
+	/** Handle reloading of the weapon. */
+	void ReloadWeapon();
+
+	UFUNCTION(BlueprintCallable)
+	void FinishReloading();
+	
 	/** Line Trace for items under the crosshairs */
 	bool TraceUnderCrosshairs(FHitResult& OutHitResult);
 
@@ -132,6 +150,7 @@ protected:
 
 	/** Check to make sure out weapon has ammo. */
 	bool WeaponHasAmmo();
+	
 private:
 	/** Setting some configuration for character movement. */
 	void SetCharacterMovementConfigurations();
@@ -354,11 +373,20 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Items", meta = (AllowPrivateAccess = "true"))
 	TMap<EAmmoType, int32> AmmoMap;
 
-	/** Starting amount of 9mm ammo */
+	/** Starting amount of 9mm ammo. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Items", meta = (AllowPrivateAccess = "true"))
 	int32 Starting9mmAmmo;
 
-	/** Starting amount of Assault Rifle ammo */
+	/** Starting amount of Assault Rifle ammo. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Items", meta = (AllowPrivateAccess = "true"))
 	int32 StartingARAmmo;
+
+	/** Combat State, can only fire or reload if Unoccupied. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Combat", meta = (AllowPrivateAccess = "true"))
+	ECombatState CombatState;
+
+	/** Montage for reload animations. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat", meta=(AllowPrivateAccess = "true"))
+	UAnimMontage* ReloadMontage;
 };
+

@@ -53,7 +53,9 @@ AShooterCharacter::AShooterCharacter() :
 	CameraInterpElevation(65.f),
 	// Starting ammo amounts 
 	Starting9mmAmmo(85),
-	StartingARAmmo(120)
+	StartingARAmmo(120),
+	// Combat variables
+	CombatState(ECombatState::ECS_Unoccupied)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -292,6 +294,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	
 	PlayerInputComponent->BindAction(TEXT("Select"), IE_Pressed, this, &AShooterCharacter::SelectButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Select"), IE_Released, this, &AShooterCharacter::SelectButtonReleased);
+
+	PlayerInputComponent->BindAction(TEXT("ReloadButton"), IE_Pressed, this, &AShooterCharacter::ReloadButtonPressed);
 }
 
 void AShooterCharacter::MoveForward(float Value)
@@ -364,11 +368,8 @@ void AShooterCharacter::LookUp(float Value)
 
 void AShooterCharacter::FireButtonPressed()
 {
-	if (WeaponHasAmmo())
-	{
-		bFireButtonPressed = true;
-		StartFireTimer();
-	}
+	bFireButtonPressed = true;
+	FireWeapon();
 }
 
 bool AShooterCharacter::WeaponHasAmmo()
@@ -386,39 +387,28 @@ void AShooterCharacter::FireButtonReleased()
 	bFireButtonPressed = false;
 }
 
-void AShooterCharacter::StartFireTimer()
+void AShooterCharacter::FireWeapon()
 {
-	if (bShouldFire)
-	{
-		FireWeapon();
-		bShouldFire = false;
-		GetWorldTimerManager().SetTimer(AutoFireTimer, this, &AShooterCharacter::AutoFireReset, AutomaticFireRate);
-	}
-}
-
-void AShooterCharacter::AutoFireReset()
-{
-	if (!WeaponHasAmmo())
+	if (EquippedWeapon == nullptr)
 	{
 		return;
 	}
-	
-	bShouldFire = true;
-	if (bFireButtonPressed)
-	{
-		StartFireTimer();
-	}
-}
 
-void AShooterCharacter::FireWeapon()
-{
-	PlayFireSoundCue();
-	CreateFireMuzzleFlashParticle();
-	PlayFireAnimMontage();
-	StartCrosshairBulletFire();
-	if (EquippedWeapon)
+	if (CombatState != ECombatState::ECS_Unoccupied)
 	{
+		return;
+	}
+
+	if (WeaponHasAmmo())
+	{
+	
+		PlayFireSoundCue();
+		CreateFireMuzzleFlashParticle();
+		PlayFireAnimMontage();
+		StartCrosshairBulletFire();
 		EquippedWeapon->DecrementAmmo();
+
+		StartFireTimer();
 	}
 }
 
@@ -535,6 +525,29 @@ void AShooterCharacter::FinishCrosshairBulletFire()
 	bFiringBullet = false;
 }
 
+void AShooterCharacter::StartFireTimer()
+{
+	CombatState = ECombatState::ECS_FireTimerInProgress;
+	GetWorldTimerManager().SetTimer(AutoFireTimer, this, &AShooterCharacter::AutoFireReset, AutomaticFireRate);
+}
+
+void AShooterCharacter::AutoFireReset()
+{
+	CombatState = ECombatState::ECS_Unoccupied;
+	if (WeaponHasAmmo())
+	{
+		if (bFireButtonPressed)
+		{
+			FireWeapon();
+		}
+	}
+	else
+	{
+		ReloadWeapon();
+	}
+
+}
+
 void AShooterCharacter::AimingButtonPressed()
 {
 	bAiming = true;
@@ -572,6 +585,42 @@ void AShooterCharacter::SelectButtonReleased()
 	TraceHitItem = nullptr;
 }
 
+void AShooterCharacter::ReloadButtonPressed()
+{
+	ReloadWeapon();
+}
+
+void AShooterCharacter::ReloadWeapon()
+{
+	if (CombatState != ECombatState::ECS_Unoccupied)
+	{
+		return;
+	}
+
+	// Do we have ammo of the correct type
+	// TODO: Create bool CarryingAmmo()
+	if (true)
+	{
+		// TODO: Create an enum for weapon type
+		// TODO: Switch on EquippedWeapon->WeaponType
+
+		FName MontageSection(TEXT("Reload SMG"));
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (ReloadMontage && AnimInstance)
+		{
+
+			AnimInstance->Montage_Play(ReloadMontage);
+			AnimInstance->Montage_JumpToSection(MontageSection);
+		}
+	}
+}
+
+void AShooterCharacter::FinishReloading()
+{
+	// TODO: Update AmmoMap
+	CombatState = ECombatState::ECS_Unoccupied;
+}
+
 void AShooterCharacter::UpdateOverlappedItemCountValue(int8 Amount)
 {
 	if (OverlappedItemCount + Amount <= 0)
@@ -607,7 +656,6 @@ void AShooterCharacter::GetPickupItem(AItem* Item)
 		UE_LOG(LogTemp, Warning, TEXT("HERE"));
 	}
 	SwapWeapon(Weapon);
-
 }
 
 void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
