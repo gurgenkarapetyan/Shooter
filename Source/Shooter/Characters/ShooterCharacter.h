@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Shooter/Library/AmmoTypeEnumLibrary.h"
+#include "Shooter/Library/CombatStateEnumLibrary.h"
 #include "ShooterCharacter.generated.h"
 
 class USpringArmComponent;
@@ -13,24 +15,6 @@ class UParticleSystem;
 class AItem;
 class AWeapon;
 
-UENUM(BlueprintType)
-enum class EAmmoType : uint8
-{
-	EAT_9mm UMETA(DisplayName = "9mm"),
-	EAT_AR UMETA(DisplayName = "Assault Rifle"),
-	
-	EAT_MAX UMETA(DisplayName = "Default Max"),
-};
-
-UENUM(BlueprintType)
-enum class ECombatState : uint8
-{
-	ECS_Unoccupied UMETA(DisplayName = "Unoccupied"),
-	ECS_FireTimerInProgress UMETA(DisplayName = "FireTimerInProgress"),
-	ECS_Reloading UMETA(DisplayName = "Reloading"),
-
-	ECS_NAX UMETA(DisplayName = "DefaultMAX")
-};
 UCLASS()
 class SHOOTER_API AShooterCharacter : public ACharacter
 {
@@ -120,6 +104,9 @@ protected:
 
 	/** Handle reloading of the weapon. */
 	void ReloadWeapon();
+
+	/** Checks to see if we have ammo of the EquippedWeapon's ammo type. */
+	bool CarryingAmmo();
 
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();

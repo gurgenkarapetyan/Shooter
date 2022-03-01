@@ -17,11 +17,6 @@ AShooterCharacter::AShooterCharacter() :
 	// Base Rates for turning/looking up
 	BaseTurnRate(45.f),
 	BaseLookUpRate(45.f),
-	// Camera field of view values
-	CameraDefaultFOV(0.f),
-	CameraZoomedFOV(35.f),
-	CameraCurrentFOV(0.f),
-	ZoomInterpSpeed(20.f),
 	// Turn Rates field of view values
 	HipTurnRate(90.f),
 	HipLookUpRate(90.f),
@@ -32,6 +27,11 @@ AShooterCharacter::AShooterCharacter() :
 	MouseHipLookUpRate(1.0f),
 	MouseAimingTurnRate(0.2f),
 	MouseAimingLookUpRate(0.2f),
+	// Camera field of view values
+	CameraDefaultFOV(0.f),
+	CameraZoomedFOV(35.f),
+	CameraCurrentFOV(0.f),
+	ZoomInterpSpeed(20.f),
 	// Crosshair spread factors
 	CrosshairSpreadMultiplier(0.f),
 	CrosshairVelocityFactor(0.f),
@@ -41,12 +41,12 @@ AShooterCharacter::AShooterCharacter() :
 	// True when aiming weapon
 	bAiming(false),
 	// Bullet fire timer variables
+	bFireButtonPressed(false),
+	bShouldFire(true),
+	// Automatic fire variables
+	AutomaticFireRate(0.1f),
 	ShootTimeDuration(0.05f),
 	bFiringBullet(false),
-	// Automatic fire variables
-	bShouldFire(true),
-	bFireButtonPressed(false),
-	AutomaticFireRate(0.1f),
 	// Item trace variables
 	bShouldTraceForItems(false),
 	CameraInterpDistance(250.f),
@@ -597,28 +597,75 @@ void AShooterCharacter::ReloadWeapon()
 		return;
 	}
 
-	// Do we have ammo of the correct type
-	// TODO: Create bool CarryingAmmo()
-	if (true)
+	if (EquippedWeapon == nullptr)
 	{
-		// TODO: Create an enum for weapon type
-		// TODO: Switch on EquippedWeapon->WeaponType
+		return;
+	}
 
-		FName MontageSection(TEXT("Reload SMG"));
+	if (CarryingAmmo())
+	{
+		CombatState = ECombatState::ECS_Reloading;
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (ReloadMontage && AnimInstance)
 		{
 
 			AnimInstance->Montage_Play(ReloadMontage);
-			AnimInstance->Montage_JumpToSection(MontageSection);
+			AnimInstance->Montage_JumpToSection(EquippedWeapon->GetReloadMontageSection());
 		}
 	}
 }
 
+bool AShooterCharacter::CarryingAmmo()
+{
+	if (EquippedWeapon == nullptr)
+	{
+		return false;
+	}
+
+	auto AmmoType = EquippedWeapon->GetAmmoType();
+
+	if (AmmoMap.Contains(AmmoType))
+	{
+		return AmmoMap[AmmoType] > 0;	
+	}
+	
+	return false;
+}
+
 void AShooterCharacter::FinishReloading()
 {
-	// TODO: Update AmmoMap
+	// Update the Combat State
 	CombatState = ECombatState::ECS_Unoccupied;
+
+	if (EquippedWeapon == nullptr)
+	{
+		return;
+	}
+
+	// Update the AmmoMap
+	const auto AmmoType = EquippedWeapon->GetAmmoType();
+	if (AmmoMap.Contains(AmmoType))
+	{
+		// Amount of ammo the Character is carrying of the EquippedWeapon type
+		int32 CarriedAmmo = AmmoMap[AmmoType];
+
+		// Space left in the magazine of EquippedWeapon
+		const int32 MagazineEmptySpace = EquippedWeapon->GetMagazineCapacity() - EquippedWeapon->GetAmmo();
+
+		if (MagazineEmptySpace > CarriedAmmo)
+		{
+			// Reload the magazine with all the ammo we are carrying
+			EquippedWeapon->ReloadAmmo(CarriedAmmo);
+			AmmoMap.Add(AmmoType, CarriedAmmo);
+		}
+		else
+		{
+			// Fill the magazine
+			EquippedWeapon->ReloadAmmo(MagazineEmptySpace);
+			CarriedAmmo -= MagazineEmptySpace;
+			AmmoMap.Add(AmmoType, CarriedAmmo);
+		}
+	}
 }
 
 void AShooterCharacter::UpdateOverlappedItemCountValue(int8 Amount)
