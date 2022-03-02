@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "Shooter/Library/OffsetStateEnumLibrary.h"
 #include "ShooterAnimInstance.generated.h"
 
 class AShooterCharacter;
@@ -39,6 +40,10 @@ public:
 protected:
 	/** Handle turning in place variables. */
 	void TurnInPlace();
+
+private:
+	/** Set Offset state. */
+	void SetOffsetState();
 	
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess="true"))
@@ -87,4 +92,8 @@ private:
 	/** True when reloading, used to prevent Aim offset when reloading. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Turn in Place", meta=(AllowPrivateAccess="true"))
 	bool bReloading;
+
+	/** Offset state; used to determine which Aim offset to use. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Turn in Place", meta=(AllowPrivateAccess="true"))
+	EOffsetState OffsetState;
 };
