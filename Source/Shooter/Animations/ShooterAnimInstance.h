@@ -16,7 +16,9 @@ class SHOOTER_API UShooterAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
-	public:
+public:
+	UShooterAnimInstance();
+	
 	virtual void NativeInitializeAnimation() override;
 
 	UFUNCTION(BlueprintCallable)
@@ -33,7 +35,12 @@ class SHOOTER_API UShooterAnimInstance : public UAnimInstance
 	bool IsCharacterInTheAir();
 	/** Returns true if the character is moving. */
 	bool IsCharacterAccelerating();
-	private:
+
+protected:
+	/** Handle turning in place variables. */
+	void TurnInPlace();
+	
+private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess="true"))
 	AShooterCharacter* ShooterCharacter;
 
@@ -58,4 +65,13 @@ class SHOOTER_API UShooterAnimInstance : public UAnimInstance
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess="true"))
 	bool bAiming;
+
+	/** Yaw of the Character this frame. */
+	float CharacterYaw;
+
+	/** Yaw of the Character the previous frame. */
+	float CharacterYawLastFrame;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Turn in Place", meta=(AllowPrivateAccess="true"))
+	float RootYawOffset;
 };
