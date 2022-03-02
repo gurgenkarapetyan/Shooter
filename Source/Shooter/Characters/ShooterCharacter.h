@@ -37,6 +37,8 @@ public:
 	
 	FORCEINLINE int8 GetOverlappedItemCount() const { return OverlappedItemCount; }
 
+	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
+	
 	/** Adds/Subtracts to/from OverlappedItemCount and updates bShouldTraceForItems*/
 	void UpdateOverlappedItemCountValue(int8 Amount);
 	

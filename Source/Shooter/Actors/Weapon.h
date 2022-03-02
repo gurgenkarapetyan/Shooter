@@ -37,6 +37,7 @@ public:
 	FORCEINLINE FName GetReloadMontageSection() const { return ReloadMontageSection; }
 	FORCEINLINE FName GetClipBoneName() const { return ClipBoneName; }
 
+	bool ClipIsFull();
 protected:
 	void StopFalling();
 	
