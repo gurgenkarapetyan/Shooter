@@ -137,7 +137,15 @@ protected:
 
 	/** Check to make sure out weapon has ammo. */
 	bool WeaponHasAmmo();
-	
+
+	/** Called from animation Blueprint with Grab Clip notify. */
+	UFUNCTION(BlueprintCallable)
+	void GrabClip();
+
+	/** Called from animation Blueprint with Release Clip notify. */
+	UFUNCTION(BlueprintCallable)
+	void ReleaseClip();
+
 private:
 	/** Setting some configuration for character movement. */
 	void SetCharacterMovementConfigurations();
@@ -375,5 +383,13 @@ private:
 	/** Montage for reload animations. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Combat", meta=(AllowPrivateAccess = "true"))
 	UAnimMontage* ReloadMontage;
+
+	/** Transform of the clip when we first grab the clip during reloading. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Combat", meta=(AllowPrivateAccess = "true"))
+	FTransform ClipTransform;
+
+	/** Scene component to attach to the Character's hand during reloading. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Combat", meta=(AllowPrivateAccess = "true"))
+	USceneComponent* HandSceneComponent;
 };
 

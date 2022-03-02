@@ -11,6 +11,7 @@ class UBoxComponent;
 class UWidgetComponent;
 class USphereComponent;
 class AShooterCharacter;
+class USoundCue;
 
 UCLASS()
 class SHOOTER_API AItem : public AActor
@@ -29,6 +30,9 @@ public:
 	FORCEINLINE UBoxComponent* GetCollisionBox() const { return CollisionBox; }
 	FORCEINLINE EItemState GetItemState() const { return ItemState; }
 	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return  ItemMesh; }
+	FORCEINLINE USoundCue* GetPickUpSound() const { return PickUpSound; }
+	FORCEINLINE USoundCue* GetEquipSound() const { return EquipSound; }
+	
 	void SetItemState(EItemState State);
 
 	/** Called from the AShooterCharacter class. */
@@ -128,6 +132,14 @@ private:
 	/** Curve used to scale the item when interping. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Item Propertis", meta = (AllowPrivateAccess="true"))
 	UCurveFloat* ItemScaleCurve;
+
+	/** Sound played when Item is picked up. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item Propertis", meta = (AllowPrivateAccess="true"))
+	USoundCue* PickUpSound;
+
+	/** Sound played when the Item is equipped. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item Propertis", meta = (AllowPrivateAccess="true"))
+	USoundCue* EquipSound;
 	
 	/** Pointer to the character. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Item Propertis", meta = (AllowPrivateAccess="true"))

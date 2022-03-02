@@ -108,6 +108,8 @@ void AShooterCharacter::SetCharacterMovementConfigurations()
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.2f;
+
+	HandSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Hand Scene Component"));
 }
 
 void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
@@ -563,6 +565,10 @@ void AShooterCharacter::SelectButtonPressed()
 	if (TraceHitItem)
 	{
 		TraceHitItem->StartItemCurve(this);
+		if (TraceHitItem->GetPickUpSound())
+		{
+			UGameplayStatics::PlaySound2D(this, TraceHitItem->GetPickUpSound());
+		}
 	}
 }
 
@@ -697,16 +703,47 @@ FVector AShooterCharacter::GetCameraInterpLocation()
 
 void AShooterCharacter::GetPickupItem(AItem* Item)
 {
-	auto Weapon = Cast<AWeapon>(Item);
-	if (!Weapon)
+	if (Item->GetEquipSound())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("HERE"));
+		UGameplayStatics::PlaySound2D(this, Item->GetEquipSound());
 	}
-	SwapWeapon(Weapon);
+	
+	auto Weapon = Cast<AWeapon>(Item);
+	if (Weapon)
+	{
+		SwapWeapon(Weapon);
+	}
 }
 
 void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
 {
 	DropWeapon();
 	EquipWeapon(WeaponToSwap);
+}
+
+void AShooterCharacter::GrabClip()
+{
+	// TODO: Fix Clip issue 
+	if (EquippedWeapon == nullptr)
+	{
+		return;
+	}
+	
+	if (HandSceneComponent == nullptr)
+	{
+		return;
+	}
+	
+	int32 ClipBoneIndex = EquippedWeapon->GetItemMesh()->GetBoneIndex(EquippedWeapon->GetClipBoneName());
+	ClipTransform = EquippedWeapon->GetItemMesh()->GetBoneTransform(ClipBoneIndex);
+	
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, true);
+	HandSceneComponent->AttachToComponent(GetMesh(), AttachmentRules, FName(TEXT("hand_l")));
+	HandSceneComponent->SetWorldTransform(ClipTransform);
+	EquippedWeapon->SetMovingClip(true);
+}
+
+void AShooterCharacter::ReleaseClip()
+{
+	EquippedWeapon->SetMovingClip(false);
 }
