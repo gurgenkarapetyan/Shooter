@@ -164,6 +164,7 @@ protected:
 	/** Interps capsule half height when crouching/standing. */
 	void InterpCapsuleHalfHeight(float DeltaTime);
 
+	void PickUpAmmo(class AAmmo* Ammo);
 private:
 	/** Setting some configuration for character movement. */
 	void SetCharacterMovementConfigurations();

@@ -32,7 +32,8 @@ public:
 	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return  ItemMesh; }
 	FORCEINLINE USoundCue* GetPickUpSound() const { return PickUpSound; }
 	FORCEINLINE USoundCue* GetEquipSound() const { return EquipSound; }
-	
+	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
+
 	void SetItemState(EItemState State);
 
 	/** Called from the AShooterCharacter class. */
@@ -54,7 +55,7 @@ protected:
 	void SetActiveStart();
 
 	/** Sets properties of the Item's components based on State. */
-	void SetItemProperties(EItemState State);
+	virtual void SetItemProperties(EItemState State);
 	
 	
 	/** Called when ItemInterpTimer is Finished. */
@@ -62,6 +63,7 @@ protected:
 
 	/** Handle item interpolation when in the EquipInterping state. */
 	void ItemInterp(float DeltaTime);
+	
 private:
 	/** Skeleton mesh for the item. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Item Properties", meta = (AllowPrivateAccess="true"))

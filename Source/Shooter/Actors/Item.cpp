@@ -7,6 +7,8 @@
 #include "Components/WidgetComponent.h"
 #include "Shooter/Characters/ShooterCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 AItem::AItem() :
@@ -212,6 +214,11 @@ void AItem::StartItemCurve(AShooterCharacter* Character)
 {
 	ShooterCharacterRef = Character;
 
+	if (PickUpSound)
+	{
+		UGameplayStatics::PlaySound2D(this, PickUpSound);
+	}
+	
 	ItemInterpStartLocation = GetActorLocation();
 	bInterping = true;
 	SetItemState(EItemState::EIS_EquipInterping);
