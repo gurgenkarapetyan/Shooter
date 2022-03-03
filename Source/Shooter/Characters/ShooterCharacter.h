@@ -83,6 +83,8 @@ protected:
 	* @param Value The input value from mouse movement.
 	*/
 	void LookUp(float Value);
+
+	virtual void Jump() override;
 	
 	/** Called when the fire button is pressed. */
 	void FireWeapon();
@@ -134,6 +136,13 @@ protected:
 
 	void SelectButtonPressed();
 	void SelectButtonReleased();
+
+	/** Set bAiming to true or false with button press. */
+	void AimingButtonPressed();
+	void AimingButtonReleased();
+
+	void Aim();
+	void StopAiming();
 	
 	/** Drops currently equipped Weapon and Equips TraceHitItem */
 	void SwapWeapon(AWeapon* WeaponToSwap);
@@ -151,6 +160,9 @@ protected:
 	/** Called from animation Blueprint with Release Clip notify. */
 	UFUNCTION(BlueprintCallable)
 	void ReleaseClip();
+
+	/** Interps capsule half height when crouching/standing. */
+	void InterpCapsuleHalfHeight(float DeltaTime);
 
 private:
 	/** Setting some configuration for character movement. */
@@ -176,11 +188,7 @@ private:
 	* @param ViewportSize for storing current viewport location.
 	*/
 	void GetCurrentSizeOfViewport(FVector2D& ViewportSize);
-
-	/** Set bAiming to true or false with button press. */
-	void AimingButtonPressed();
-	void AimingButtonReleased();
-
+	
 	/** Handle interpolation for zoom when aiming */
 	void CameraInterpZoom(float DeltaTime);
 	
@@ -401,5 +409,36 @@ private:
 	/** True when crouching. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess = "true"))
 	bool bCrouching;
+
+	/** Regular movement speed. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess = "true"))
+	float BaseMovementSpeed;
+
+	/** Crouch movement speed. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess = "true"))
+	float CrouchMovementSpeed;
+
+	/** Current half height of the capsule. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Movement", meta=(AllowPrivateAccess = "true"))
+	float CurrentCapsuleHalfHeight;
+
+	/** Half height of the capsule when not crouching. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Movement", meta=(AllowPrivateAccess = "true"))
+	float StandingCapsuleHalfHeight;
+
+	/** Half height of the capsule when crouching. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Movement", meta=(AllowPrivateAccess = "true"))
+	float CrouchingCapsuleHalfHeight;
+
+	/** Ground friction while not crouching. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Movement", meta=(AllowPrivateAccess = "true"))
+	float BaseGroundFriction;
+
+	/** Ground friction while crouching. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Movement", meta=(AllowPrivateAccess = "true"))
+	float CrouchingGroundFriction;
+
+	/** Used for knowing when the aiming button is pressed. */
+	bool bAimingButtonPressed;
 };
 

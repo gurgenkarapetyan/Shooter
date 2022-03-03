@@ -21,7 +21,9 @@ UShooterAnimInstance::UShooterAnimInstance() :
 	CharacterRotation(FRotator(0.f)),
 	CharacterRotationLastFrame(FRotator(0.f)),
 	YawDelta(0.f),
-	bCrouching(false)
+	bCrouching(false),
+	RecoilWeight(0.f),
+	bTurningInPlace(false)
 {
 	
 }
@@ -100,7 +102,6 @@ void UShooterAnimInstance::SetOffsetState()
 	}
 }
 
-
 void UShooterAnimInstance::TurnInPlace()
 {
 	if (ShooterCharacter == nullptr)
@@ -132,6 +133,7 @@ void UShooterAnimInstance::TurnInPlace()
 		const float Turning{ GetCurveValue(TEXT("Turning")) };
 		if (Turning > 0)
 		{
+			bTurningInPlace = true;
 			RotationCurveLastFrame = RotationCurve;
 			RotationCurve = GetCurveValue(TEXT("Rotation"));
 			const float DeltaRotation{ RotationCurve - RotationCurveLastFrame };
@@ -145,6 +147,30 @@ void UShooterAnimInstance::TurnInPlace()
 				const float YawExcess{ ABSRootYawOffset - 90.f };
 				RootYawOffset > 0 ? RootYawOffset -= YawExcess : RootYawOffset += YawExcess;
 			}
+		}
+		else
+		{
+			bTurningInPlace = true;
+		}
+	}
+	SetRecoilWeight();
+}
+
+void UShooterAnimInstance::SetRecoilWeight()
+{
+	if (bTurningInPlace)
+	{
+		bReloading ? RecoilWeight  = 1.f : RecoilWeight = 0.f;
+	}
+	else
+	{
+		if (bCrouching)
+		{
+			bReloading ? RecoilWeight  = 1.f : RecoilWeight = 0.1f;
+		}
+		else
+		{
+			(bAiming || bReloading) ? RecoilWeight  = 1.f : RecoilWeight = 0.5f;
 		}
 	}
 }
