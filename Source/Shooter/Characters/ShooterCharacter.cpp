@@ -55,7 +55,8 @@ AShooterCharacter::AShooterCharacter() :
 	Starting9mmAmmo(85),
 	StartingARAmmo(120),
 	// Combat variables
-	CombatState(ECombatState::ECS_Unoccupied)
+	CombatState(ECombatState::ECS_Unoccupied),
+	bCrouching(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -298,6 +299,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction(TEXT("Select"), IE_Released, this, &AShooterCharacter::SelectButtonReleased);
 
 	PlayerInputComponent->BindAction(TEXT("ReloadButton"), IE_Pressed, this, &AShooterCharacter::ReloadButtonPressed);
+
+	PlayerInputComponent->BindAction(TEXT("Crouch"), IE_Pressed, this, &AShooterCharacter::CrouchButtonPressed);
 }
 
 void AShooterCharacter::MoveForward(float Value)
@@ -671,6 +674,14 @@ void AShooterCharacter::FinishReloading()
 			CarriedAmmo -= MagazineEmptySpace;
 			AmmoMap.Add(AmmoType, CarriedAmmo);
 		}
+	}
+}
+
+void AShooterCharacter::CrouchButtonPressed()
+{
+	if (!GetCharacterMovement()->IsFalling())
+	{
+		bCrouching = !bCrouching;
 	}
 }
 

@@ -34,6 +34,8 @@ public:
 
 	/** Returns aiming true/false. */
 	FORCEINLINE bool GetAiming() const { return bAiming; }
+	/** Returns crouching true/false. */
+	FORCEINLINE bool GetCrouching() const { return bCrouching; }
 	
 	FORCEINLINE int8 GetOverlappedItemCount() const { return OverlappedItemCount; }
 
@@ -112,6 +114,8 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
+
+	void CrouchButtonPressed();
 	
 	/** Line Trace for items under the crosshairs */
 	bool TraceUnderCrosshairs(FHitResult& OutHitResult);
@@ -393,5 +397,9 @@ private:
 	/** Scene component to attach to the Character's hand during reloading. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Combat", meta=(AllowPrivateAccess = "true"))
 	USceneComponent* HandSceneComponent;
+
+	/** True when crouching. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Movement", meta=(AllowPrivateAccess = "true"))
+	bool bCrouching;
 };
 
