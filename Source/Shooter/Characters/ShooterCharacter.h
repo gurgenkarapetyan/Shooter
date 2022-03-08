@@ -15,6 +15,21 @@ class UParticleSystem;
 class AItem;
 class AWeapon;
 
+USTRUCT(BlueprintType)
+struct FInterpLocation
+{
+	GENERATED_BODY()
+
+	/** Scene component used for its location for interping. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USceneComponent* SceneComponent;
+
+	/** Number of items interping to/at this scene comp location. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int32 ItemCount;
+};
+
+
 UCLASS()
 class SHOOTER_API AShooterCharacter : public ACharacter
 {
@@ -40,15 +55,20 @@ public:
 	FORCEINLINE int8 GetOverlappedItemCount() const { return OverlappedItemCount; }
 
 	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
+
+	FInterpLocation GetInterpLocation(int32 Index);
+
+	/** Return the index in InterpLocations array with the lowest ItemCount; */
+	int32 GetInterpLocationIndex();
+
+	void IncrementInterpLocationItemCount(int32 Index, int32 Amount);
 	
 	/** Adds/Subtracts to/from OverlappedItemCount and updates bShouldTraceForItems*/
 	void UpdateOverlappedItemCountValue(int8 Amount);
 	
 	UFUNCTION(BlueprintCallable)
 	float GetCrosshairSpreadMultiplier() const;
-
-	FVector GetCameraInterpLocation();
-
+	
 	void GetPickupItem(AItem* Item);
 	
 protected:
@@ -165,9 +185,13 @@ protected:
 	void InterpCapsuleHalfHeight(float DeltaTime);
 
 	void PickUpAmmo(class AAmmo* Ammo);
+
 private:
 	/** Setting some configuration for character movement. */
 	void SetCharacterMovementConfigurations();
+
+	/** Create interpolation component for pickable items. */
+	void CreateInterpolationComponent();
 	
 	/** Playing fire sound cue when character starts firing. */
 	void PlayFireSoundCue();
@@ -224,7 +248,10 @@ private:
 	* @param CrosshairShooting for calculating value of shooting factor.
 	*/
 	void CalculateCrosshairFiringFactor(float DeltaTime, float &CrosshairShooting);
-	
+
+	/** Create FInterLocation structs for each interp location. Add to the array. */
+	void InitializeInterpLocations();
+
 private:
 	/** Camera boom positioning the camera behind the character. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Camera", meta=(AllowPrivateAccess = "true"))
@@ -441,5 +468,30 @@ private:
 
 	/** Used for knowing when the aiming button is pressed. */
 	bool bAimingButtonPressed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	USceneComponent* InterpWeaponComp;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp2;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp3;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp4;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp5;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	USceneComponent* InterpComp6;
+	
+	/** Array of interp location structs. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
+	TArray<FInterpLocation> InterpLocations;
 };
 

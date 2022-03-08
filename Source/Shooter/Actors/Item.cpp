@@ -23,7 +23,9 @@ AItem::AItem() :
 	bInterping(false),
 	ItemInterpX(0.f),
 	ItemInterpY(0.f),
-	InterpInitialYawOffset(0.f)
+	InterpInitialYawOffset(0.f),
+	ItemType(EItemType::EIT_MAX),
+	InterpLocationIndex(0)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -214,6 +216,9 @@ void AItem::StartItemCurve(AShooterCharacter* Character)
 {
 	ShooterCharacterRef = Character;
 
+	InterpLocationIndex = Character->GetInterpLocationIndex();
+	Character->IncrementInterpLocationItemCount(InterpLocationIndex, 1);
+	
 	if (PickUpSound)
 	{
 		UGameplayStatics::PlaySound2D(this, PickUpSound);
@@ -237,6 +242,7 @@ void AItem::FinishInterping()
 	bInterping = false;
 	if (ShooterCharacterRef)
 	{
+		ShooterCharacterRef->IncrementInterpLocationItemCount(InterpLocationIndex, -1);
 		ShooterCharacterRef->GetPickupItem(this);
 	}
 	SetActorScale3D(FVector(1.f));
@@ -259,7 +265,7 @@ void AItem::ItemInterp(float DeltaTime)
 		// Get the item's initial location when the curve started
 		FVector ItemLocation = ItemInterpStartLocation;
 		// Get location in front of the camera
-		const FVector CameraInterpLocation{ ShooterCharacterRef->GetCameraInterpLocation() };
+		const FVector CameraInterpLocation{ GetInterpLocation() };
 
 		// Vector from Item to Camera Interp Location, X and Y are zeroed out
 		const FVector ItemToCamera{ FVector(0.f, 0.f, (CameraInterpLocation - ItemLocation).Z) };
@@ -293,4 +299,22 @@ void AItem::ItemInterp(float DeltaTime)
 			SetActorScale3D(FVector(ScaleCurveValue, ScaleCurveValue, ScaleCurveValue));
 		}
 	}
+}
+
+FVector AItem::GetInterpLocation()
+{
+	if (ShooterCharacterRef == nullptr)
+	{
+		return FVector(0.f);
+	}
+
+	switch (ItemType)
+	{
+	case EItemType::EIT_Ammo:
+		return ShooterCharacterRef->GetInterpLocation(InterpLocationIndex).SceneComponent->GetComponentLocation();
+	case EItemType::EIT_Weapn:
+		return ShooterCharacterRef->GetInterpLocation(0).SceneComponent->GetComponentLocation();
+	}
+	
+	return FVector();
 }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Shooter/Library/ItemEnumLibrary.h"
+#include "Shooter/Library/ItemTypeEnumLibrary.h"
 #include "Item.generated.h"
 
 class UBoxComponent;
@@ -63,7 +64,10 @@ protected:
 
 	/** Handle item interpolation when in the EquipInterping state. */
 	void ItemInterp(float DeltaTime);
-	
+
+	/** Get interp location base on the item type. */
+	FVector GetInterpLocation();
+
 private:
 	/** Skeleton mesh for the item. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Item Properties", meta = (AllowPrivateAccess="true"))
@@ -146,4 +150,13 @@ private:
 	/** Pointer to the character. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Item Propertis", meta = (AllowPrivateAccess="true"))
 	AShooterCharacter* ShooterCharacterRef;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties", meta=(AllowPrivateAccess = "true"))
+	EItemType ItemType;
+	
+	/** Index of the interp location this item is interping to. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta=(AllowPrivateAccess = "true"))
+	int32 InterpLocationIndex;
+
+	F
 };
