@@ -34,12 +34,6 @@ protected:
 	void Lean(float DeltaTime);
 	
 private:
-	/**
-	* Set the lateral speed of the character from the velocity.
-	* @param CharacterSpeed passing by reference and setting the speed value.
-	*/
-	void SetCharacterSpeed(float& CharacterSpeed) const;
-
 	/** Returns true if the character is in the air. */
 	bool IsCharacterInTheAir() const;
 
@@ -51,6 +45,15 @@ private:
 	
 	/** Returns true if the character is reloading. */
 	bool IsCharacterReloading() const;
+	
+	/**
+	* Set the lateral speed of the character from the velocity.
+	* @param CharacterSpeed passing by reference and setting the speed value.
+	*/
+	void SetCharacterSpeed(float& CharacterSpeed) const;
+
+	/** Calculate MovementOffsetYaw for running blendspace. */
+	void CalculateMovementOffsetYaw();
 
 	/** Set Offset state. */
 	void SetOffsetState();

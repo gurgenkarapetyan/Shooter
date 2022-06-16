@@ -49,14 +49,7 @@ void UShooterAnimInstance::UpdateAnimationProperties(const float DeltaTime)
 	
 	SetCharacterSpeed(Speed);
 
-	const FRotator AimRotation = ShooterCharacter->GetBaseAimRotation();
-	const FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(ShooterCharacter->GetVelocity());
-	MovementOffsetYaw = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation,AimRotation).Yaw;
-
-	if (ShooterCharacter->GetVelocity().Size() > 0.f)
-	{
-		LastMovementOffsetYaw = MovementOffsetYaw;
-	}
+	CalculateMovementOffsetYaw();
 
 	bAiming = ShooterCharacter->GetAiming();
 
@@ -91,6 +84,18 @@ void UShooterAnimInstance::SetCharacterSpeed(float& CharacterSpeed) const
 	FVector Velocity = ShooterCharacter->GetVelocity();
 	Velocity.Z = 0;
 	CharacterSpeed = Velocity.Size();
+}
+
+void UShooterAnimInstance::CalculateMovementOffsetYaw()
+{
+	const FRotator AimRotation = ShooterCharacter->GetBaseAimRotation();
+	const FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(ShooterCharacter->GetVelocity());
+	MovementOffsetYaw = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation,AimRotation).Yaw;
+
+	if (ShooterCharacter->GetVelocity().Size() > 0.f)
+	{
+		LastMovementOffsetYaw = MovementOffsetYaw;
+	}
 }
 
 void UShooterAnimInstance::SetOffsetState()

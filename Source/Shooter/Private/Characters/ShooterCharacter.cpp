@@ -547,8 +547,8 @@ void AShooterCharacter::SetBulletLineTrace(const FTransform Barrel)
 		const FVector End = CrosshairWorldPosition + CrosshairWorldDirection * 50000.f;
 
 		FVector BeamEndPoint = End;
+		
 		GetWorld()->LineTraceSingleByChannel(ScreenTraceHit, Start, End, ECollisionChannel::ECC_Visibility);
-
 		if (ScreenTraceHit.bBlockingHit)
 		{
 			BeamEndPoint = ScreenTraceHit.Location;
@@ -586,7 +586,7 @@ bool AShooterCharacter::GetScreenSpaceLocationOfCrosshairs(FVector& CrosshairWor
 	FVector2D ViewportSize;
 	GetCurrentSizeOfViewport(ViewportSize);
 
-	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	const FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
 
 	return UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0), CrosshairLocation,CrosshairWorldPosition,CrosshairWorldDirection);	
 }

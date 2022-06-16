@@ -222,9 +222,8 @@ private:
 	
 	/**
 	* Returns true if deprojection was successful.
-	* @param CurrentViewportSize current viewport location.
 	* @param CrosshairWorldPosition corresponding 3D position in world space.
-	* @param CrosshairWorldDirection world space direction vector away from the camera at the given 2d point.
+	* @param CrosshairWorldDirection world space direction vector away from the camera at the given 2D point.
 	*/
 	bool GetScreenSpaceLocationOfCrosshairs(FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection);
 
