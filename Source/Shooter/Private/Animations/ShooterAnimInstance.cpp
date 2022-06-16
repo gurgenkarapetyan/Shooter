@@ -35,19 +35,19 @@ void UShooterAnimInstance::NativeInitializeAnimation()
 	ShooterCharacter = Cast<AShooterCharacter>(TryGetPawnOwner());
 }
 
-void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
+void UShooterAnimInstance::UpdateAnimationProperties(const float DeltaTime)
 {
-	if (!ShooterCharacter)
+	if (ShooterCharacter == nullptr)
 	{
 		return;
 	}
 
-	bCrouching = ShooterCharacter->GetCrouching();
-	bReloading = (ShooterCharacter->GetCombatState() == ECombatState::ECS_Reloading);
-	SetCharacterSpeed(Speed);
-
+	bCrouching = IsCharacterCrouching();
+	bReloading = IsCharacterReloading();
 	bIsInAir = IsCharacterInTheAir();
 	bIsAccelerating = IsCharacterAccelerating();
+	
+	SetCharacterSpeed(Speed);
 
 	const FRotator AimRotation = ShooterCharacter->GetBaseAimRotation();
 	const FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(ShooterCharacter->GetVelocity());
@@ -65,13 +65,6 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 	Lean(DeltaTime);
 }
 
-void UShooterAnimInstance::SetCharacterSpeed(float& CharacterSpeed) const
-{
-	FVector Velocity = ShooterCharacter->GetVelocity();
-	Velocity.Z = 0;
-	CharacterSpeed = Velocity.Size();
-}
-
 bool UShooterAnimInstance::IsCharacterInTheAir() const
 {
 	return ShooterCharacter->GetCharacterMovement()->IsFalling();
@@ -80,6 +73,24 @@ bool UShooterAnimInstance::IsCharacterInTheAir() const
 bool UShooterAnimInstance::IsCharacterAccelerating() const
 {
 	return (ShooterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f);
+}
+
+bool UShooterAnimInstance::IsCharacterCrouching() const
+{
+	return ShooterCharacter->GetCrouching();
+}
+
+bool UShooterAnimInstance::IsCharacterReloading() const
+{
+	return (ShooterCharacter->GetCombatState() == ECombatState::ECS_Reloading);
+}
+
+void UShooterAnimInstance::SetCharacterSpeed(float& CharacterSpeed) const
+{
+	// Get the lateral speed of the character from velocity
+	FVector Velocity = ShooterCharacter->GetVelocity();
+	Velocity.Z = 0;
+	CharacterSpeed = Velocity.Size();
 }
 
 void UShooterAnimInstance::SetOffsetState()

@@ -29,8 +29,8 @@ public:
 	FORCEINLINE UWidgetComponent* GetPickUpWidget() const { return PickUpWidget; }
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 	FORCEINLINE UBoxComponent* GetCollisionBox() const { return CollisionBox; }
-	FORCEINLINE EItemState GetItemState() const { return ItemState; }
 	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return  ItemMesh; }
+	FORCEINLINE EItemState GetItemState() const { return ItemState; }
 	FORCEINLINE USoundCue* GetPickUpSound() const { return PickUpSound; }
 	FORCEINLINE USoundCue* GetEquipSound() const { return EquipSound; }
 	FORCEINLINE int32 GetItemCount() const { return ItemCount; }

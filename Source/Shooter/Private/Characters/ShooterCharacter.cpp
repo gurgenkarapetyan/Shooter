@@ -69,45 +69,22 @@ AShooterCharacter::AShooterCharacter() :
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	// Create a camera boom (pulls in towards the character if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 180.0f;
+	// Rotate the arm based on the controller
 	CameraBoom->bUsePawnControlRotation = true;
 	CameraBoom->SocketOffset = FVector(0.f, 50.f, 70.f);
 
+	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	// Camera does not rotate relative to arm
 	FollowCamera->bUsePawnControlRotation = false;
 
 	SetCharacterMovementConfigurations();
 	CreateInterpolationComponent();
-}
-
-void AShooterCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	if (FollowCamera)
-	{
-		CameraDefaultFOV = GetFollowCamera()->FieldOfView;
-		CameraCurrentFOV = CameraDefaultFOV;
-	}
-
-	EquipWeapon(SpawnDefaultWeapon());
-	InitializeAmmoMap();
-	GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
-	InitializeInterpLocations();
-}
-
-void AShooterCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	
-	InterpCapsuleHalfHeight(DeltaTime);
-	CameraInterpZoom(DeltaTime);
-	SetLookUpRates();
-	CalculateCrosshairSpread(DeltaTime);
-	TraceForItems();
 }
 
 void AShooterCharacter::SetCharacterMovementConfigurations()
@@ -147,6 +124,33 @@ void AShooterCharacter::CreateInterpolationComponent()
 	
 	InterpComp6 = CreateDefaultSubobject<USceneComponent>(TEXT("Interpolation Component 6"));
 	InterpComp6->SetupAttachment(GetFollowCamera());
+}
+
+void AShooterCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	if (FollowCamera)
+	{
+		CameraDefaultFOV = GetFollowCamera()->FieldOfView;
+		CameraCurrentFOV = CameraDefaultFOV;
+	}
+
+	EquipWeapon(SpawnDefaultWeapon());
+	InitializeAmmoMap();
+	GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
+	InitializeInterpLocations();
+}
+
+void AShooterCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+	InterpCapsuleHalfHeight(DeltaTime);
+	CameraInterpZoom(DeltaTime);
+	SetLookUpRates();
+	CalculateCrosshairSpread(DeltaTime);
+	TraceForItems();
 }
 
 void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
@@ -353,6 +357,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis(TEXT("TurnRate"), this, &AShooterCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis(TEXT("LookUpRate"), this, &AShooterCharacter::LookUpAtRate);
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AShooterCharacter::Turn);
+	// TODO call LookUp instead of LookUpAtRate
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AShooterCharacter::LookUpAtRate);
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &AShooterCharacter::Jump);
@@ -372,7 +377,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction(TEXT("Crouch"), IE_Pressed, this, &AShooterCharacter::CrouchButtonPressed);
 }
 
-void AShooterCharacter::MoveForward(float Value)
+void AShooterCharacter::MoveForward(const float Value)
 {
 	if (Controller == nullptr && Value == 0.0f)
 	{
@@ -386,7 +391,7 @@ void AShooterCharacter::MoveForward(float Value)
 	AddMovementInput(Direction, Value);
 }
 
-void AShooterCharacter::MoveRight(float Value)
+void AShooterCharacter::MoveRight(const float Value)
 {
 	if (Controller == nullptr && Value == 0.0f)
 	{
@@ -400,17 +405,19 @@ void AShooterCharacter::MoveRight(float Value)
 	AddMovementInput(Direction, Value);
 }
 
-void AShooterCharacter::TurnAtRate(float Rate)
+void AShooterCharacter::TurnAtRate(const float Rate)
 {
+	// Calculate delta for this frame from the rate information
 	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 }
 
-void AShooterCharacter::LookUpAtRate(float Rate)
+void AShooterCharacter::LookUpAtRate(const float Rate)
 {
+	// Calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-void AShooterCharacter::Turn(float Value)
+void AShooterCharacter::Turn(const float Value)
 {
 	float TurnScaleFactor;
 	if (bAiming)
@@ -425,7 +432,7 @@ void AShooterCharacter::Turn(float Value)
 	AddControllerYawInput(Value * TurnScaleFactor);
 }
 
-void AShooterCharacter::LookUp(float Value)
+void AShooterCharacter::LookUp(const float Value)
 {
 	float LookUpScaleFactor;
 	if (bAiming)
@@ -510,7 +517,7 @@ void AShooterCharacter::PlayFireSoundCue() const
 
 void AShooterCharacter::CreateFireMuzzleFlashParticle()
 {
-	if (!EquippedWeapon)
+	if (EquippedWeapon == nullptr)
 	{
 		return;
 	}
@@ -547,7 +554,7 @@ void AShooterCharacter::SetBulletLineTrace(const FTransform Barrel)
 			BeamEndPoint = ScreenTraceHit.Location;
 			if (ImpactParticle)
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, ScreenTraceHit.Location);
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, BeamEndPoint);
 			}
 		}
 
