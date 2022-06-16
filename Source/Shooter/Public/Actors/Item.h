@@ -157,6 +157,4 @@ private:
 	/** Index of the interp location this item is interping to. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta=(AllowPrivateAccess = "true"))
 	int32 InterpLocationIndex;
-
-	F
 };
