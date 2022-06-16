@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Ammo.h"
+#include "Shooter/Public/Items/Ammo.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
-#include "Shooter/Characters/ShooterCharacter.h"
+#include "Shooter/Public/Characters/ShooterCharacter.h"
 
 AAmmo::AAmmo()
 {
@@ -37,7 +37,7 @@ void AAmmo::AmmoSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 {
 	if (OtherActor)
 	{
-		auto OverlappedShooterCharacter = Cast<AShooterCharacter>(OtherActor);
+		const auto OverlappedShooterCharacter = Cast<AShooterCharacter>(OtherActor);
 		if (OverlappedShooterCharacter)
 		{
 			StartItemCurve(OverlappedShooterCharacter);
@@ -74,9 +74,7 @@ void AAmmo::SetItemProperties(EItemState State)
 		AmmoMesh->SetSimulatePhysics(true);
 		AmmoMesh->SetEnableGravity(true);
 		AmmoMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-		AmmoMesh->SetCollisionResponseToChannel(
-			ECollisionChannel::ECC_WorldStatic,
-			ECollisionResponse::ECR_Block);
+		AmmoMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
 		break;
 	case EItemState::EIS_EquipInterping:
 		// Set mesh properties
@@ -85,6 +83,8 @@ void AAmmo::SetItemProperties(EItemState State)
 		AmmoMesh->SetVisibility(true);
 		AmmoMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		AmmoMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+	default:
 		break;
 	}
 }

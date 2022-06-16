@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Item.h"
+#include "Shooter/Public/Actors/Item.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
-#include "Shooter/Characters/ShooterCharacter.h"
+#include "Shooter/Public/Characters/ShooterCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
@@ -127,6 +127,8 @@ void AItem::SetActiveStart()
 		ActiveStars[4] = true;
 		ActiveStars[5] = true;
 		break;
+	default:
+		break;
 	}
 }
 
@@ -202,6 +204,8 @@ void AItem::SetItemProperties(EItemState State)
 		
 		CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+	default:
 		break;
 	}
 }
@@ -301,7 +305,7 @@ void AItem::ItemInterp(float DeltaTime)
 	}
 }
 
-FVector AItem::GetInterpLocation()
+FVector AItem::GetInterpLocation() const
 {
 	if (ShooterCharacterRef == nullptr)
 	{
@@ -314,6 +318,8 @@ FVector AItem::GetInterpLocation()
 		return ShooterCharacterRef->GetInterpLocation(InterpLocationIndex).SceneComponent->GetComponentLocation();
 	case EItemType::EIT_Weapn:
 		return ShooterCharacterRef->GetInterpLocation(0).SceneComponent->GetComponentLocation();
+	default:
+		break;
 	}
 	
 	return FVector();

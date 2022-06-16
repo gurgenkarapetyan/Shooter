@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Shooter/Actors/Item.h"
+#include "Shooter/Public/Actors/Item.h"
 #include "Shooter/Library/AmmoTypeEnumLibrary.h"
 #include "Ammo.generated.h"
 

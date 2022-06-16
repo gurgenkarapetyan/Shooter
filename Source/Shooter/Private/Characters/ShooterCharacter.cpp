@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "ShooterCharacter.h"
+#include "Shooter/Public/Characters/ShooterCharacter.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -11,9 +11,9 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "Shooter/Actors/Item.h"
-#include "Shooter/Actors/Weapon.h"
-#include "Shooter/Items/Ammo.h"
+#include "Shooter/Public/Actors/Item.h"
+#include "Shooter/Public/Actors/Weapon.h"
+#include "Shooter/Public/Items/Ammo.h"
 
 AShooterCharacter::AShooterCharacter() :
 	// Base Rates for turning/looking up
@@ -173,24 +173,24 @@ void AShooterCharacter::InitializeAmmoMap()
 
 void AShooterCharacter::InitializeInterpLocations()
 {
-	FInterpLocation WeaponLocation{ InterpWeaponComp, 0 };
+	const FInterpLocation WeaponLocation{ InterpWeaponComp, 0 };
 	InterpLocations.Add(WeaponLocation);
 
-	FInterpLocation InterpLocation1{ InterpComp1, 0 };
+	const FInterpLocation InterpLocation1{ InterpComp1, 0 };
 	InterpLocations.Add(InterpLocation1);
-	FInterpLocation InterpLocation2{ InterpComp2, 0 };
+	const FInterpLocation InterpLocation2{ InterpComp2, 0 };
 	InterpLocations.Add(InterpLocation2);
-	FInterpLocation InterpLocation3{ InterpComp3, 0 };
+	const FInterpLocation InterpLocation3{ InterpComp3, 0 };
 	InterpLocations.Add(InterpLocation3);
-	FInterpLocation InterpLocation4{ InterpComp4, 0 };
+	const FInterpLocation InterpLocation4{ InterpComp4, 0 };
 	InterpLocations.Add(InterpLocation4);
-	FInterpLocation InterpLocation5{ InterpComp5, 0 };
+	const FInterpLocation InterpLocation5{ InterpComp5, 0 };
 	InterpLocations.Add(InterpLocation5);
-	FInterpLocation InterpLocation6{ InterpComp6, 0 };
+	const FInterpLocation InterpLocation6{ InterpComp6, 0 };
 	InterpLocations.Add(InterpLocation6);
 }
 
-AWeapon* AShooterCharacter::SpawnDefaultWeapon()
+AWeapon* AShooterCharacter::SpawnDefaultWeapon() const
 {
 	if (!DefaultWeaponClass)
 	{	
@@ -200,7 +200,7 @@ AWeapon* AShooterCharacter::SpawnDefaultWeapon()
 	return GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
 }
 
-void AShooterCharacter::InterpCapsuleHalfHeight(float DeltaTime)
+void AShooterCharacter::InterpCapsuleHalfHeight(float DeltaTime) const
 {
 	float TargetCapsuleHalfHeight{};
 	bCrouching ? TargetCapsuleHalfHeight = CrouchingCapsuleHalfHeight : TargetCapsuleHalfHeight = StandingCapsuleHalfHeight;
@@ -256,7 +256,7 @@ void AShooterCharacter::CalculateCrosshairSpread(float DeltaTime)
 	CrosshairSpreadMultiplier = 0.5f + CrosshairVelocityFactor + CrosshariInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
 }
 
-void AShooterCharacter::CalculateCrosshairInAirFactor(float DeltaTime, float& CrosshariInAir)
+void AShooterCharacter::CalculateCrosshairInAirFactor(float DeltaTime, float& CrosshariInAir) const
 {
 	if (GetCharacterMovement()->IsFalling())
 	{
@@ -268,7 +268,7 @@ void AShooterCharacter::CalculateCrosshairInAirFactor(float DeltaTime, float& Cr
 	}
 }
 
-void AShooterCharacter::CalculateCrosshairAimFactor(float DeltaTime, float& CrosshariInAir)
+void AShooterCharacter::CalculateCrosshairAimFactor(float DeltaTime, float& CrosshariInAir) const
 {
 	if (bAiming)
 	{
@@ -280,7 +280,7 @@ void AShooterCharacter::CalculateCrosshairAimFactor(float DeltaTime, float& Cros
 	}
 }
 
-void AShooterCharacter::CalculateCrosshairFiringFactor(float DeltaTime, float& CrosshariInAir)
+void AShooterCharacter::CalculateCrosshairFiringFactor(float DeltaTime, float& CrosshariInAir) const
 {
 	if (bFiringBullet)
 	{
@@ -460,7 +460,7 @@ void AShooterCharacter::FireButtonPressed()
 	FireWeapon();
 }
 
-bool AShooterCharacter::WeaponHasAmmo()
+bool AShooterCharacter::WeaponHasAmmo() const
 {
 	if (!EquippedWeapon)
 	{
@@ -500,7 +500,7 @@ void AShooterCharacter::FireWeapon()
 	}
 }
 
-void AShooterCharacter::PlayFireSoundCue()
+void AShooterCharacter::PlayFireSoundCue() const
 {
 	if (FireSound)
 	{
@@ -592,7 +592,7 @@ void AShooterCharacter::GetCurrentSizeOfViewport(FVector2D& ViewportSize)
 	}
 }
 
-void AShooterCharacter::PlayFireAnimMontage()
+void AShooterCharacter::PlayFireAnimMontage() const
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && HipFireMontage)
@@ -675,7 +675,7 @@ void AShooterCharacter::SelectButtonPressed()
 	}
 }
 
-void AShooterCharacter::DropWeapon()
+void AShooterCharacter::DropWeapon() const
 {
 	if (!EquippedWeapon)
 	{
@@ -841,14 +841,14 @@ void AShooterCharacter::GetPickupItem(AItem* Item)
 	{
 		UGameplayStatics::PlaySound2D(this, Item->GetEquipSound());
 	}
-	
-	auto Weapon = Cast<AWeapon>(Item);
+
+	const auto Weapon = Cast<AWeapon>(Item);
 	if (Weapon)
 	{
 		SwapWeapon(Weapon);
 	}
 
-	auto Ammo = Cast<AAmmo>(Item);
+	const auto Ammo = Cast<AAmmo>(Item);
 	if (Ammo)
 	{
 		PickUpAmmo(Ammo);
@@ -893,11 +893,11 @@ void AShooterCharacter::GrabClip()
 	{
 		return;
 	}
-	
-	int32 ClipBoneIndex = EquippedWeapon->GetItemMesh()->GetBoneIndex(EquippedWeapon->GetClipBoneName());
+
+	const int32 ClipBoneIndex = EquippedWeapon->GetItemMesh()->GetBoneIndex(EquippedWeapon->GetClipBoneName());
 	ClipTransform = EquippedWeapon->GetItemMesh()->GetBoneTransform(ClipBoneIndex);
-	
-	FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, true);
+
+	const FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, true);
 	HandSceneComponent->AttachToComponent(GetMesh(), AttachmentRules, FName(TEXT("hand_l")));
 	HandSceneComponent->SetWorldTransform(ClipTransform);
 	EquippedWeapon->SetMovingClip(true);

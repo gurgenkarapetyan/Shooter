@@ -58,7 +58,6 @@ protected:
 	/** Sets properties of the Item's components based on State. */
 	virtual void SetItemProperties(EItemState State);
 	
-	
 	/** Called when ItemInterpTimer is Finished. */
 	void FinishInterping();
 
@@ -66,7 +65,7 @@ protected:
 	void ItemInterp(float DeltaTime);
 
 	/** Get interp location base on the item type. */
-	FVector GetInterpLocation();
+	FVector GetInterpLocation() const;
 
 private:
 	/** Skeleton mesh for the item. */

@@ -1,5 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 
-#include "ShooterGameModeBase.h"
+#include "Shooter/Public/GameMode/ShooterGameModeBase.h"
 

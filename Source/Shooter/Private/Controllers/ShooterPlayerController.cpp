@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "ShooterPlayerController.h"
+#include "Shooter/Public/Controllers/ShooterPlayerController.h"
 #include "Blueprint/UserWidget.h"
 
 AShooterPlayerController::AShooterPlayerController()

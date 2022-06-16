@@ -146,13 +146,13 @@ protected:
 	void TraceForItems();
 
 	/** Spawns a default weapon and equips it. */
-	AWeapon* SpawnDefaultWeapon();
+	AWeapon* SpawnDefaultWeapon() const;
 
 	/** Takes a weapon and attaches it to the mesh. */
 	void EquipWeapon(AWeapon* WeaponToEquip);
 
 	/** Detach weapon and let it fall to the ground. */
-	void DropWeapon();
+	void DropWeapon() const;
 
 	void SelectButtonPressed();
 	void SelectButtonReleased();
@@ -171,7 +171,7 @@ protected:
 	void InitializeAmmoMap();
 
 	/** Check to make sure out weapon has ammo. */
-	bool WeaponHasAmmo();
+	bool WeaponHasAmmo() const;
 
 	/** Called from animation Blueprint with Grab Clip notify. */
 	UFUNCTION(BlueprintCallable)
@@ -182,7 +182,7 @@ protected:
 	void ReleaseClip();
 
 	/** Interps capsule half height when crouching/standing. */
-	void InterpCapsuleHalfHeight(float DeltaTime);
+	void InterpCapsuleHalfHeight(float DeltaTime) const;
 
 	void PickUpAmmo(class AAmmo* Ammo);
 
@@ -194,13 +194,13 @@ private:
 	void CreateInterpolationComponent();
 	
 	/** Playing fire sound cue when character starts firing. */
-	void PlayFireSoundCue();
+	void PlayFireSoundCue() const;
 
 	/** Create particle effect when character starts firing. */
 	void CreateFireMuzzleFlashParticle();
 	
 	/** Play fire weapon animation montage when character starts firing. */
-	void PlayFireAnimMontage();
+	void PlayFireAnimMontage() const;
 
 	/**
 	 * Create LineTrace when character starts firing.
@@ -212,7 +212,7 @@ private:
 	* Returns the size of the current viewport.
 	* @param ViewportSize for storing current viewport location.
 	*/
-	void GetCurrentSizeOfViewport(FVector2D& ViewportSize);
+	static void GetCurrentSizeOfViewport(FVector2D& ViewportSize);
 	
 	/** Handle interpolation for zoom when aiming */
 	void CameraInterpZoom(float DeltaTime);
@@ -233,21 +233,21 @@ private:
 	* @param DeltaTime .
 	* @param CrosshariInAir for calculating value of air factor.
 	*/
-	void CalculateCrosshairInAirFactor(float DeltaTime, float &CrosshariInAir);
+	void CalculateCrosshairInAirFactor(float DeltaTime, float &CrosshariInAir) const;
 
 	/**
 	* Calculate crosshair aim factor.
 	* @param DeltaTime .
 	* @param CrosshairAim for calculating value of air factor.
 	*/
-	void CalculateCrosshairAimFactor(float DeltaTime, float &CrosshairAim);
+	void CalculateCrosshairAimFactor(float DeltaTime, float &CrosshairAim) const;
 
 	/**
 	* Calculate crosshair firing factor.
 	* @param DeltaTime
 	* @param CrosshairShooting for calculating value of shooting factor.
 	*/
-	void CalculateCrosshairFiringFactor(float DeltaTime, float &CrosshairShooting);
+	void CalculateCrosshairFiringFactor(float DeltaTime, float &CrosshairShooting) const;
 
 	/** Create FInterLocation structs for each interp location. Add to the array. */
 	void InitializeInterpLocations();

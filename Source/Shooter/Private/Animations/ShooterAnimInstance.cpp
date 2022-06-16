@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "ShooterAnimInstance.h"
+#include "Shooter/Public/Animations/ShooterAnimInstance.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Shooter/Characters/ShooterCharacter.h"
+#include "Shooter/Public/Characters/ShooterCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
 
 UShooterAnimInstance::UShooterAnimInstance() :
@@ -49,8 +49,8 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 	bIsInAir = IsCharacterInTheAir();
 	bIsAccelerating = IsCharacterAccelerating();
 
-	FRotator AimRotation = ShooterCharacter->GetBaseAimRotation();
-	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(ShooterCharacter->GetVelocity());
+	const FRotator AimRotation = ShooterCharacter->GetBaseAimRotation();
+	const FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(ShooterCharacter->GetVelocity());
 	MovementOffsetYaw = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation,AimRotation).Yaw;
 
 	if (ShooterCharacter->GetVelocity().Size() > 0.f)
@@ -65,19 +65,19 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 	Lean(DeltaTime);
 }
 
-void UShooterAnimInstance::SetCharacterSpeed(float& CharacterSpeed)
+void UShooterAnimInstance::SetCharacterSpeed(float& CharacterSpeed) const
 {
 	FVector Velocity = ShooterCharacter->GetVelocity();
 	Velocity.Z = 0;
 	CharacterSpeed = Velocity.Size();
 }
 
-bool UShooterAnimInstance::IsCharacterInTheAir()
+bool UShooterAnimInstance::IsCharacterInTheAir() const
 {
 	return ShooterCharacter->GetCharacterMovement()->IsFalling();
 }
 
-bool UShooterAnimInstance::IsCharacterAccelerating()
+bool UShooterAnimInstance::IsCharacterAccelerating() const
 {
 	return (ShooterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f);
 }

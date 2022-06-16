@@ -30,12 +30,12 @@ public:
 	* Set the lateral speed of the character from the velocity.
 	* @param CharacterSpeed passing by reference and setting the speed value.
 	*/
-	void SetCharacterSpeed(float& CharacterSpeed);
+	void SetCharacterSpeed(float& CharacterSpeed) const;
 
 	/** Returns true if the character is in the air. */
-	bool IsCharacterInTheAir();
+	bool IsCharacterInTheAir() const;
 	/** Returns true if the character is moving. */
-	bool IsCharacterAccelerating();
+	bool IsCharacterAccelerating() const;
 
 protected:
 	/** Handle turning in place variables. */

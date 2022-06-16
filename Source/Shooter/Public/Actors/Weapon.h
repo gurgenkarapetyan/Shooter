@@ -29,7 +29,7 @@ public:
 	FORCEINLINE void SetMovingClip(bool Move) { bMovingClip = Move; }
 
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
-	FORCEINLINE int32 GetMagazineCapacity() { return MagazineCapacity; }
+	FORCEINLINE int32 GetMagazineCapacity() const { return MagazineCapacity; }
 
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 	FORCEINLINE EAmmoType GetAmmoType() const { return AmmoType; }
