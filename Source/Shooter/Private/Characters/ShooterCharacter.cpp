@@ -30,10 +30,10 @@ AShooterCharacter::AShooterCharacter() :
 	MouseAimingTurnRate(0.2f),
 	MouseAimingLookUpRate(0.2f),
 	// Camera field of view values
-	CameraDefaultFOV(0.f),
-	CameraZoomedFOV(35.f),
-	CameraCurrentFOV(0.f),
-	ZoomInterpSpeed(20.f),
+	CameraDefaultFieldOfView(0.f),
+	CameraZoomedFieldOfView(35.f),
+	CameraCurrentFieldOfView(0.f),
+	ZoomInterpolationSpeed(20.f),
 	// Crosshair spread factors
 	CrosshairSpreadMultiplier(0.f),
 	CrosshairVelocityFactor(0.f),
@@ -132,25 +132,14 @@ void AShooterCharacter::BeginPlay()
 	
 	if (FollowCamera)
 	{
-		CameraDefaultFOV = GetFollowCamera()->FieldOfView;
-		CameraCurrentFOV = CameraDefaultFOV;
+		CameraDefaultFieldOfView = GetFollowCamera()->FieldOfView;
+		CameraCurrentFieldOfView = CameraDefaultFieldOfView;
 	}
 
 	EquipWeapon(SpawnDefaultWeapon());
 	InitializeAmmoMap();
 	GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
 	InitializeInterpLocations();
-}
-
-void AShooterCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	
-	InterpCapsuleHalfHeight(DeltaTime);
-	CameraInterpZoom(DeltaTime);
-	SetLookUpRates();
-	CalculateCrosshairSpread(DeltaTime);
-	TraceForItems();
 }
 
 void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
@@ -167,6 +156,16 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 		EquippedWeapon = WeaponToEquip;
 		EquippedWeapon->SetItemState(EItemState::EIS_Equipped);
 	}
+}
+
+AWeapon* AShooterCharacter::SpawnDefaultWeapon() const
+{
+	if (!DefaultWeaponClass)
+	{	
+		return nullptr;	
+	}
+
+	return GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
 }
 
 void AShooterCharacter::InitializeAmmoMap()
@@ -194,14 +193,16 @@ void AShooterCharacter::InitializeInterpLocations()
 	InterpLocations.Add(InterpLocation6);
 }
 
-AWeapon* AShooterCharacter::SpawnDefaultWeapon() const
-{
-	if (!DefaultWeaponClass)
-	{	
-		return nullptr;	
-	}
 
-	return GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
+void AShooterCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+	InterpCapsuleHalfHeight(DeltaTime);
+	CameraInterpolationZoom(DeltaTime);
+	SetLookUpRates();
+	CalculateCrosshairSpread(DeltaTime);
+	TraceForItems();
 }
 
 void AShooterCharacter::InterpCapsuleHalfHeight(float DeltaTime) const
@@ -218,17 +219,17 @@ void AShooterCharacter::InterpCapsuleHalfHeight(float DeltaTime) const
 	GetCapsuleComponent()->SetCapsuleHalfHeight(InterpHalfHeight);
 }
 
-void AShooterCharacter::CameraInterpZoom(float DeltaTime)
+void AShooterCharacter::CameraInterpolationZoom(float DeltaTime)
 {
 	if (bAiming)
 	{
-		CameraCurrentFOV = FMath::FInterpTo(CameraCurrentFOV, CameraZoomedFOV, DeltaTime, ZoomInterpSpeed);
+		CameraCurrentFieldOfView = FMath::FInterpTo(CameraCurrentFieldOfView, CameraZoomedFieldOfView, DeltaTime, ZoomInterpolationSpeed);
 	}
 	else
 	{
-		CameraCurrentFOV = FMath::FInterpTo(CameraCurrentFOV, CameraDefaultFOV, DeltaTime, ZoomInterpSpeed);
+		CameraCurrentFieldOfView = FMath::FInterpTo(CameraCurrentFieldOfView, CameraDefaultFieldOfView, DeltaTime, ZoomInterpolationSpeed);
 	}
-	GetFollowCamera()->SetFieldOfView(CameraCurrentFOV);
+	GetFollowCamera()->SetFieldOfView(CameraCurrentFieldOfView);
 }
 
 void AShooterCharacter::SetLookUpRates()

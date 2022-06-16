@@ -215,7 +215,7 @@ private:
 	static void GetCurrentSizeOfViewport(FVector2D& ViewportSize);
 	
 	/** Handle interpolation for zoom when aiming. */
-	void CameraInterpZoom(float DeltaTime);
+	void CameraInterpolationZoom(float DeltaTime);
 	
 	/** Set BaseTurnRate and BaseLookUpRate based on aiming. */
 	void SetLookUpRates();
@@ -321,17 +321,17 @@ private:
 	float MouseAimingLookUpRate;
 	
 	/** Default camera field of view value. */
-	float CameraDefaultFOV;
+	float CameraDefaultFieldOfView;
 	
 	/** Field of view value for when zoomed in. */
-	float CameraZoomedFOV;
+	float CameraZoomedFieldOfView;
 
 	/** Current Field of view this view. */
-	float CameraCurrentFOV;
+	float CameraCurrentFieldOfView;
 
 	/** Interp speed when zooming. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat",  meta=(AllowPrivateAccess = "true"))
-	float ZoomInterpSpeed;
+	float ZoomInterpolationSpeed;
 
 	/** Determines the spread of the crosshairs. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Crosshairs", meta=(AllowPrivateAccess = "true"))

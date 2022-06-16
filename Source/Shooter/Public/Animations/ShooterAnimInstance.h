@@ -45,7 +45,10 @@ private:
 	
 	/** Returns true if the character is reloading. */
 	bool IsCharacterReloading() const;
-	
+
+	/** Returns true if the character is aiming. */
+	bool IsCharacterAiming() const;
+
 	/**
 	* Set the lateral speed of the character from the velocity.
 	* @param CharacterSpeed passing by reference and setting the speed value.

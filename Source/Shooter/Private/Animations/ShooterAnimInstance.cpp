@@ -46,12 +46,11 @@ void UShooterAnimInstance::UpdateAnimationProperties(const float DeltaTime)
 	bReloading = IsCharacterReloading();
 	bIsInAir = IsCharacterInTheAir();
 	bIsAccelerating = IsCharacterAccelerating();
+	bAiming = IsCharacterAiming();
 	
 	SetCharacterSpeed(Speed);
 
 	CalculateMovementOffsetYaw();
-
-	bAiming = ShooterCharacter->GetAiming();
 
 	SetOffsetState();
 	TurnInPlace();
@@ -76,6 +75,11 @@ bool UShooterAnimInstance::IsCharacterCrouching() const
 bool UShooterAnimInstance::IsCharacterReloading() const
 {
 	return (ShooterCharacter->GetCombatState() == ECombatState::ECS_Reloading);
+}
+
+bool UShooterAnimInstance::IsCharacterAiming() const
+{
+	return  ShooterCharacter->GetAiming();
 }
 
 void UShooterAnimInstance::SetCharacterSpeed(float& CharacterSpeed) const
