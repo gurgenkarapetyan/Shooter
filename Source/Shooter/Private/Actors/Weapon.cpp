@@ -29,7 +29,7 @@ void AWeapon::Tick(float DeltaSeconds)
 
 void AWeapon::ThrowWeapon()
 {
-	FRotator MeshRotation { 0.f, GetItemMesh()->GetComponentRotation().Yaw, 0.f };
+	const FRotator MeshRotation { 0.f, GetItemMesh()->GetComponentRotation().Yaw, 0.f };
 	GetItemMesh()->SetWorldRotation(MeshRotation, false, nullptr, ETeleportType::TeleportPhysics);
 
 	const FVector MeshForward { GetItemMesh()->GetForwardVector() };
@@ -38,7 +38,7 @@ void AWeapon::ThrowWeapon()
 	// Direction in which we throw the Weapon
 	FVector ImpulseDirection = MeshRight.RotateAngleAxis(-20.f, MeshForward);
 
-	float RandomRotation = 30.f;
+	constexpr float RandomRotation = 30.f;
 	ImpulseDirection = ImpulseDirection.RotateAngleAxis(RandomRotation, FVector(0.f, 0.f, 1.f));
 	ImpulseDirection *= 20000.f;
 	GetItemMesh()->AddImpulse(ImpulseDirection);
@@ -68,7 +68,7 @@ void AWeapon::ReloadAmmo(int32 Amount)
 	Ammo += Amount;
 }
 
-bool AWeapon::ClipIsFull()
+bool AWeapon::ClipIsFull() const
 {
 	return Ammo >= MagazineCapacity;
 }

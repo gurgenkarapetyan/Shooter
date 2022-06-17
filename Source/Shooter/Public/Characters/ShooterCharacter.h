@@ -64,7 +64,7 @@ public:
 	void IncrementInterpLocationItemCount(int32 Index, int32 Amount);
 	
 	/** Adds/Subtracts to/from OverlappedItemCount and updates bShouldTraceForItems. */
-	void UpdateOverlappedItemCountValue(int8 Amount);
+	void UpdateOverlappedItemCountValue(const int8 Amount);
 	
 	UFUNCTION(BlueprintCallable)
 	float GetCrosshairSpreadMultiplier() const;
@@ -93,13 +93,13 @@ protected:
 	void LookUpAtRate(const float Rate);
 	
 	/**
-	* Rotate controller base on mouse X movement.
+	* Rotate controller based on mouse X movement.
 	* @param Value The input value from mouse movement.
 	*/
 	void Turn(const float Value);
 	
 	/**
-	* Rotate controller base on mouse Y movement.
+	* Rotate controller based on mouse Y movement.
 	* @param Value The input value from mouse movement.
 	*/
 	void LookUp(const float Value);
@@ -110,7 +110,7 @@ protected:
 	void FireWeapon();
 	
 	/** Calculate crosshair spread amount value. */
-	void CalculateCrosshairSpread(float DeltaTime);
+	void CalculateCrosshairSpread(const float DeltaTime);
 	
 	void StartCrosshairBulletFire();
 	
@@ -212,7 +212,7 @@ private:
 	* Returns the size of the current viewport.
 	* @param ViewportSize for storing current viewport location.
 	*/
-	static void GetCurrentSizeOfViewport(FVector2D& ViewportSize);
+	void GetCurrentSizeOfViewport(FVector2D& ViewportSize);
 	
 	/** Handle interpolation for zoom when aiming. */
 	void CameraInterpolationZoom(float DeltaTime);
@@ -230,26 +230,26 @@ private:
 	/**
 	*  Calculate crosshair in air factor
 	* @param DeltaTime .
-	* @param CrosshariInAir for calculating value of air factor.
+	* @param CrosshairInAir for calculating value of air factor.
 	*/
-	void CalculateCrosshairInAirFactor(float DeltaTime, float &CrosshariInAir) const;
+	void CalculateCrosshairInAirFactor(const float DeltaTime, float& CrosshairInAir) const;
 
 	/**
 	* Calculate crosshair aim factor.
 	* @param DeltaTime .
 	* @param CrosshairAim for calculating value of air factor.
 	*/
-	void CalculateCrosshairAimFactor(float DeltaTime, float &CrosshairAim) const;
+	void CalculateCrosshairAimFactor(const float DeltaTime, float& CrosshairAim) const;
 
 	/**
 	* Calculate crosshair firing factor.
 	* @param DeltaTime .
 	* @param CrosshairShooting for calculating value of shooting factor.
 	*/
-	void CalculateCrosshairFiringFactor(float DeltaTime, float &CrosshairShooting) const;
+	void CalculateCrosshairFiringFactor(const float DeltaTime, float& CrosshairShooting) const;
 
-	/** Create FInterLocation structs for each interp location. Add to the array. */
-	void InitializeInterpLocations();
+	/** Create FInterLocation structs for each interpolation location. Add to the array. */
+	void InitializeInterpolationLocations();
 
 private:
 	/** Camera boom positioning the camera behind the character. */
@@ -397,13 +397,13 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	AItem* TraceHitItem;
 	
-	/** Distance outward from the camera for the interp destination. */
+	/** Distance outward from the camera for the interpolation destination. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))
-	float CameraInterpDistance;
+	float CameraInterpolationDistance;
 	
-	/** Distance upward from the camera for the interp destination. */
+	/** Distance upward from the camera for the interpolation destination. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))
-	float CameraInterpElevation;
+	float CameraInterpolationElevation;
 
 	/** Map to keep track of ammo of the different ammo types. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))

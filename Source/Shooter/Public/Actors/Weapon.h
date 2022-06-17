@@ -26,7 +26,7 @@ public:
 	
 	void ReloadAmmo(int32 Amount);
 
-	FORCEINLINE void SetMovingClip(bool Move) { bMovingClip = Move; }
+	FORCEINLINE void SetMovingClip(const bool Move) { bMovingClip = Move; }
 
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetMagazineCapacity() const { return MagazineCapacity; }
@@ -37,13 +37,15 @@ public:
 	FORCEINLINE FName GetReloadMontageSection() const { return ReloadMontageSection; }
 	FORCEINLINE FName GetClipBoneName() const { return ClipBoneName; }
 
-	bool ClipIsFull();
+	bool ClipIsFull() const;
 protected:
 	void StopFalling();
 	
 private:
 	FTimerHandle ThrowWeaponTimer;
+
 	float ThrowWeaponTime;
+
 	bool bFalling;
 
 	/** Ammo count for this Weapon. */

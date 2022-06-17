@@ -11,6 +11,7 @@ enum class EItemRarity : uint8
 	EIR_Uncommon UMETA(DisplayName = "Uncommon"),
 	EIR_Rare UMETA(DisplayName = "Rare"),
 	EIR_Legendary UMETA(DisplayName = "Legendary"),
+
 	EIR_MAX UMETA(DisplayName = "DefaultMax"),
 };
 
@@ -22,5 +23,6 @@ enum class EItemState : uint8
 	EIS_PickedUp UMETA(DisplayName = "PickedUp"),
 	EIS_Equipped UMETA(DisplayName = "Equipped"),
 	EIS_Falling UMETA(DisplayName = "Falling"),
+
 	EIS_MAX UMETA(DisplayName = "DefaultMax"),
 };

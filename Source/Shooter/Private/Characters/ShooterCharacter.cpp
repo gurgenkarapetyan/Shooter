@@ -3,7 +3,9 @@
 #include "Shooter/Public/Characters/ShooterCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -51,8 +53,8 @@ AShooterCharacter::AShooterCharacter() :
 	bFiringBullet(false),
 	// Item trace variables
 	bShouldTraceForItems(false),
-	CameraInterpDistance(250.f),
-	CameraInterpElevation(65.f),
+	CameraInterpolationDistance(250.f),
+	CameraInterpolationElevation(65.f),
 	// Starting ammo amounts 
 	Starting9mmAmmo(85),
 	StartingARAmmo(120),
@@ -139,7 +141,7 @@ void AShooterCharacter::BeginPlay()
 	EquipWeapon(SpawnDefaultWeapon());
 	InitializeAmmoMap();
 	GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
-	InitializeInterpLocations();
+	InitializeInterpolationLocations();
 }
 
 void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
@@ -148,6 +150,9 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 	{
 		return;
 	}
+
+	WeaponToEquip->GetAreaSphere()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	WeaponToEquip->GetCollisionBox()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
 	const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("RightHandSocket"));
 	if (HandSocket)
@@ -174,7 +179,7 @@ void AShooterCharacter::InitializeAmmoMap()
 	AmmoMap.Add(EAmmoType::EAT_AR, StartingARAmmo);
 }
 
-void AShooterCharacter::InitializeInterpLocations()
+void AShooterCharacter::InitializeInterpolationLocations()
 {
 	const FInterpLocation WeaponLocation{ InterpWeaponComp, 0 };
 	InterpLocations.Add(WeaponLocation);
@@ -246,10 +251,10 @@ void AShooterCharacter::SetLookUpRates()
 	}
 }
 
-void AShooterCharacter::CalculateCrosshairSpread(float DeltaTime)
+void AShooterCharacter::CalculateCrosshairSpread(const float DeltaTime)
 {
-	FVector2D WalkSpeedRange { 0.f, 600.f };
-	FVector2D VelocityMultiplierRange { 0.f, 1.0f };
+	const FVector2D WalkSpeedRange { 0.f, 600.f };
+	const FVector2D VelocityMultiplierRange { 0.f, 1.0f };
 	FVector Velocity = GetVelocity();
 	Velocity.Z = 0.f;
 	
@@ -261,39 +266,39 @@ void AShooterCharacter::CalculateCrosshairSpread(float DeltaTime)
 	CrosshairSpreadMultiplier = 0.5f + CrosshairVelocityFactor + CrosshariInAirFactor - CrosshairAimFactor + CrosshairShootingFactor;
 }
 
-void AShooterCharacter::CalculateCrosshairInAirFactor(float DeltaTime, float& CrosshariInAir) const
+void AShooterCharacter::CalculateCrosshairInAirFactor(const float DeltaTime, float& CrosshairInAir) const
 {
 	if (GetCharacterMovement()->IsFalling())
 	{
-		CrosshariInAir = FMath::FInterpTo(CrosshariInAir, 2.25f, DeltaTime, 2.25f);
+		CrosshairInAir = FMath::FInterpTo(CrosshairInAir, 2.25f, DeltaTime, 2.25f);
 	}
 	else
 	{
-		CrosshariInAir = FMath::FInterpTo(CrosshariInAir, 0.f, DeltaTime, 30.f);
+		CrosshairInAir = FMath::FInterpTo(CrosshairInAir, 0.f, DeltaTime, 30.f);
 	}
 }
 
-void AShooterCharacter::CalculateCrosshairAimFactor(float DeltaTime, float& CrosshariInAir) const
+void AShooterCharacter::CalculateCrosshairAimFactor(const float DeltaTime, float& CrosshairInAir) const
 {
 	if (bAiming)
 	{
-		CrosshariInAir = FMath::FInterpTo(CrosshairAimFactor, 0.6f, DeltaTime, 30.f);
+		CrosshairInAir = FMath::FInterpTo(CrosshairAimFactor, 0.6f, DeltaTime, 30.f);
 	}
 	else
 	{
-		CrosshariInAir = FMath::FInterpTo(CrosshairAimFactor, 0.f, DeltaTime, 30.f);
+		CrosshairInAir = FMath::FInterpTo(CrosshairAimFactor, 0.f, DeltaTime, 30.f);
 	}
 }
 
-void AShooterCharacter::CalculateCrosshairFiringFactor(float DeltaTime, float& CrosshariInAir) const
+void AShooterCharacter::CalculateCrosshairFiringFactor(const float DeltaTime, float& CrosshairInAir) const
 {
 	if (bFiringBullet)
 	{
-		CrosshariInAir = FMath::FInterpTo(CrosshairShootingFactor,  0.3f, DeltaTime, 60.f);	
+		CrosshairInAir = FMath::FInterpTo(CrosshairShootingFactor,  0.3f, DeltaTime, 60.f);	
 	}
 	else
 	{
-		CrosshariInAir = FMath::FInterpTo(CrosshairShootingFactor,  0.f, DeltaTime, 60.f);	
+		CrosshairInAir = FMath::FInterpTo(CrosshairShootingFactor,  0.f, DeltaTime, 60.f);	
 	}
 }
 
@@ -312,18 +317,25 @@ void AShooterCharacter::TraceForItems()
 				TraceHitItem->GetPickUpWidget()->SetVisibility(true);
 			}
 
+			// We hit an AItem last fram
 			if (TraceHitItemLastFrame)
 			{
 				if (TraceHitItem != TraceHitItemLastFrame)
 				{
+					// We are hitting a different AItem this frame from last frame
+					// Or AItem is null this frame
 					TraceHitItemLastFrame->GetPickUpWidget()->SetVisibility(false);
 				}
 			}
+
+			// Store a reference to HitItem for next frame
 			TraceHitItemLastFrame = TraceHitItem;
 		}
 	}
 	else if (TraceHitItemLastFrame)
 	{
+		// No longer overlapping any items,
+		// Item last frame should not show widget
 		TraceHitItemLastFrame->GetPickUpWidget()->SetVisibility(false);
 	}
 }
@@ -332,7 +344,8 @@ bool AShooterCharacter::TraceUnderCrosshairs(FHitResult& OutHitResult)
 {
 	FVector CrosshairWorldPosition;
 	FVector CrosshairWorldDirection;
-	bool bScreenToWorld = GetScreenSpaceLocationOfCrosshairs(CrosshairWorldPosition, CrosshairWorldDirection);
+
+	const bool bScreenToWorld = GetScreenSpaceLocationOfCrosshairs(CrosshairWorldPosition, CrosshairWorldDirection);
 	if (bScreenToWorld)
 	{
 		const FVector Start { CrosshairWorldPosition };
@@ -348,7 +361,6 @@ bool AShooterCharacter::TraceUnderCrosshairs(FHitResult& OutHitResult)
 	return false;
 }
 
-
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -358,8 +370,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis(TEXT("TurnRate"), this, &AShooterCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis(TEXT("LookUpRate"), this, &AShooterCharacter::LookUpAtRate);
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AShooterCharacter::Turn);
-	// TODO call LookUp instead of LookUpAtRate
-	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AShooterCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AShooterCharacter::LookUp);
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &AShooterCharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Released, this, &ACharacter::StopJumping);
@@ -549,7 +560,7 @@ void AShooterCharacter::SetBulletLineTrace(const FTransform Barrel)
 
 		FVector BeamEndPoint = End;
 		
-		GetWorld()->LineTraceSingleByChannel(ScreenTraceHit, Start, End, ECollisionChannel::ECC_Visibility);
+		GetWorld()->LineTraceSingleByChannel(ScreenTraceHit, Start, End, ECC_Visibility);
 		if (ScreenTraceHit.bBlockingHit)
 		{
 			BeamEndPoint = ScreenTraceHit.Location;
@@ -563,7 +574,7 @@ void AShooterCharacter::SetBulletLineTrace(const FTransform Barrel)
 		FHitResult WeaponTraceHit;
 		const FVector WeaponTraceStart = Barrel.GetLocation();
 		const FVector WeaponTraceEnd = BeamEndPoint;
-		GetWorld()->LineTraceSingleByChannel(WeaponTraceHit, WeaponTraceStart, WeaponTraceEnd, ECollisionChannel::ECC_Visibility);
+		GetWorld()->LineTraceSingleByChannel(WeaponTraceHit, WeaponTraceStart, WeaponTraceEnd, ECC_Visibility);
 
 		// object between barrel and BeamEndPoint
 		if (WeaponTraceHit.bBlockingHit)
@@ -641,7 +652,6 @@ void AShooterCharacter::AutoFireReset()
 	{
 		ReloadWeapon();
 	}
-
 }
 
 void AShooterCharacter::AimingButtonPressed()
@@ -690,7 +700,7 @@ void AShooterCharacter::DropWeapon() const
 		return;
 	}
 
-	FDetachmentTransformRules DetachmentTransformRules(EDetachmentRule::KeepWorld, true);
+	const FDetachmentTransformRules DetachmentTransformRules(EDetachmentRule::KeepWorld, true);
 	EquippedWeapon->GetItemMesh()->DetachFromComponent(DetachmentTransformRules);
 
 	EquippedWeapon->SetItemState(EItemState::EIS_Falling);
@@ -824,7 +834,7 @@ FInterpLocation AShooterCharacter::GetInterpLocation(int32 Index)
 	return FInterpLocation();
 }
 
-void AShooterCharacter::UpdateOverlappedItemCountValue(int8 Amount)
+void AShooterCharacter::UpdateOverlappedItemCountValue(const int8 Amount)
 {
 	if (OverlappedItemCount + Amount <= 0)
 	{

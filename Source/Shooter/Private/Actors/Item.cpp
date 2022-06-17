@@ -17,15 +17,15 @@ AItem::AItem() :
 	ItemRarity(EItemRarity::EIR_Common),
 	ItemState(EItemState::EIS_Pickup),
 	ZCurveTime(0.7f),
-	// Item interp variables
-	ItemInterpStartLocation(FVector(0.f)),
+	// Item interpolation variables
+	ItemInterpolationStartLocation(FVector(0.f)),
 	CameraTargetLocation(FVector(0.f)),
-	bInterping(false),
-	ItemInterpX(0.f),
-	ItemInterpY(0.f),
-	InterpInitialYawOffset(0.f),
+	bInterpolating(false),
+	ItemInterpolationX(0.f),
+	ItemInterpolationY(0.f),
+	InterpolationInitialYawOffset(0.f),
 	ItemType(EItemType::EIT_MAX),
-	InterpLocationIndex(0)
+	InterpolationLocationIndex(0)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -59,14 +59,6 @@ void AItem::BeginPlay()
 	
 	SetActiveStart();
 	SetItemProperties(ItemState);
-}
-
-// Called every frame
-void AItem::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	ItemInterp(DeltaTime);
 }
 
 void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
@@ -132,7 +124,7 @@ void AItem::SetActiveStart()
 	}
 }
 
-void AItem::SetItemProperties(EItemState State)
+void AItem::SetItemProperties(const EItemState State)
 {
 	switch (State)
 	{
@@ -210,7 +202,7 @@ void AItem::SetItemProperties(EItemState State)
 	}
 }
 
-void AItem::SetItemState(EItemState State)
+void AItem::SetItemState(const EItemState State)
 {
 	ItemState = State;
 	SetItemProperties(State);
@@ -220,81 +212,88 @@ void AItem::StartItemCurve(AShooterCharacter* Character)
 {
 	ShooterCharacterRef = Character;
 
-	InterpLocationIndex = Character->GetInterpLocationIndex();
-	Character->IncrementInterpLocationItemCount(InterpLocationIndex, 1);
+	InterpolationLocationIndex = Character->GetInterpLocationIndex();
+	Character->IncrementInterpLocationItemCount(InterpolationLocationIndex, 1);
 	
 	if (PickUpSound)
 	{
 		UGameplayStatics::PlaySound2D(this, PickUpSound);
 	}
 	
-	ItemInterpStartLocation = GetActorLocation();
-	bInterping = true;
+	ItemInterpolationStartLocation = GetActorLocation();
+	bInterpolating = true;
 	SetItemState(EItemState::EIS_EquipInterping);
-	GetWorldTimerManager().SetTimer(ItemInterpTimer, this, &AItem::FinishInterping, ZCurveTime);
+	GetWorldTimerManager().SetTimer(ItemInterpolationTimer, this, &AItem::FinishInterpolating, ZCurveTime);
 	
 	// Get initial Yaw of the Camera
 	const float CameraRotationYaw{ Character->GetFollowCamera()->GetComponentRotation().Yaw };
 	// Get initial Yaw of the Item
 	const float ItemRotationYaw{ GetActorRotation().Yaw };
 	// Initial Yaw offset between Camera and Item
-	InterpInitialYawOffset = ItemRotationYaw - CameraRotationYaw;
+	InterpolationInitialYawOffset = ItemRotationYaw - CameraRotationYaw;
 }
 
-void AItem::FinishInterping()
+void AItem::FinishInterpolating()
 {
-	bInterping = false;
+	bInterpolating = false;
 	if (ShooterCharacterRef)
 	{
-		ShooterCharacterRef->IncrementInterpLocationItemCount(InterpLocationIndex, -1);
+		ShooterCharacterRef->IncrementInterpLocationItemCount(InterpolationLocationIndex, -1);
 		ShooterCharacterRef->GetPickupItem(this);
 	}
 	SetActorScale3D(FVector(1.f));
 }
 
-void AItem::ItemInterp(float DeltaTime)
+// Called every frame
+void AItem::Tick(float DeltaTime)
 {
-	if (!bInterping)
+	Super::Tick(DeltaTime);
+
+	ItemInterpolation(DeltaTime);
+}
+
+void AItem::ItemInterpolation(const float DeltaTime)
+{
+	if (!bInterpolating)
 	{
 		return;
 	}
 
 	if (ShooterCharacterRef && ItemZCurve)
 	{
-		// Elapsed time since we started ItemInterpTimer
-		const float ElapsedTime = GetWorldTimerManager().GetTimerElapsed(ItemInterpTimer);
+		// Elapsed time since we started ItemInterpolationTimer
+		const float ElapsedTime = GetWorldTimerManager().GetTimerElapsed(ItemInterpolationTimer);
 		// Get curve value corresponding to ElapsedTime
 		const float CurveValue = ItemZCurve->GetFloatValue(ElapsedTime);
 
 		// Get the item's initial location when the curve started
-		FVector ItemLocation = ItemInterpStartLocation;
+		FVector ItemLocation = ItemInterpolationStartLocation;
 		// Get location in front of the camera
-		const FVector CameraInterpLocation{ GetInterpLocation() };
+		const FVector CameraInterpolationLocation{ GetInterpolationLocation() };
 
-		// Vector from Item to Camera Interp Location, X and Y are zeroed out
-		const FVector ItemToCamera{ FVector(0.f, 0.f, (CameraInterpLocation - ItemLocation).Z) };
+		// Vector from Item to Camera Interpolation Location, X and Y are zeroed out
+		const FVector ItemToCamera{ FVector(0.f, 0.f, (CameraInterpolationLocation - ItemLocation).Z) };
 		// Scale factor to multiply with CurveValue
 		const float DeltaZ = ItemToCamera.Size();
 
 		const FVector CurrentLocation{ GetActorLocation() };
 		// Interpolated X value
-		const float InterpXValue = FMath::FInterpTo(CurrentLocation.X,CameraInterpLocation.X, DeltaTime,30.0f);
+		const float InterpolationXValue = FMath::FInterpTo(CurrentLocation.X,CameraInterpolationLocation.X, DeltaTime,30.0f);
 		// Interpolated Y value
-		const float InterpYValue = FMath::FInterpTo(CurrentLocation.Y,CameraInterpLocation.Y,DeltaTime,30.f);
+		const float InterpolationYValue = FMath::FInterpTo(CurrentLocation.Y,CameraInterpolationLocation.Y,DeltaTime,30.f);
 
-		// Set X and Y of ItemLocation to Interped values
-		ItemLocation.X = InterpXValue;
-		ItemLocation.Y = InterpYValue;
+		// Set X and Y of ItemLocation to Interpolated values
+		ItemLocation.X = InterpolationXValue;
+		ItemLocation.Y = InterpolationYValue;
 
 		// Adding curve value to the Z component of the Initial Location (scaled by DeltaZ)
 		ItemLocation.Z += CurveValue * DeltaZ;
 		SetActorLocation(ItemLocation, true, nullptr, ETeleportType::TeleportPhysics);
-
 		
 		// Camera rotation this frame
 		const FRotator CameraRotation{ ShooterCharacterRef->GetFollowCamera()->GetComponentRotation() };
 		// Camera rotation plus inital Yaw Offset
-		FRotator ItemRotation{ 0.f, CameraRotation.Yaw + InterpInitialYawOffset, 0.f };
+		const FRotator ItemRotation{ 0.f, CameraRotation.Yaw + InterpolationInitialYawOffset, 0.f };
 		SetActorRotation(ItemRotation, ETeleportType::TeleportPhysics);
 
 		if (ItemScaleCurve)
@@ -305,7 +304,7 @@ void AItem::ItemInterp(float DeltaTime)
 	}
 }
 
-FVector AItem::GetInterpLocation() const
+FVector AItem::GetInterpolationLocation() const
 {
 	if (ShooterCharacterRef == nullptr)
 	{
@@ -315,7 +314,7 @@ FVector AItem::GetInterpLocation() const
 	switch (ItemType)
 	{
 	case EItemType::EIT_Ammo:
-		return ShooterCharacterRef->GetInterpLocation(InterpLocationIndex).SceneComponent->GetComponentLocation();
+		return ShooterCharacterRef->GetInterpLocation(InterpolationLocationIndex).SceneComponent->GetComponentLocation();
 	case EItemType::EIT_Weapn:
 		return ShooterCharacterRef->GetInterpLocation(0).SceneComponent->GetComponentLocation();
 	default:
