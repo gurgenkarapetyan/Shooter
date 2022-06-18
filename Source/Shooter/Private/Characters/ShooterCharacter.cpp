@@ -824,7 +824,7 @@ void AShooterCharacter::CrouchButtonPressed()
 	}
 }
 
-FInterpLocation AShooterCharacter::GetInterpLocation(int32 Index)
+FInterpLocation AShooterCharacter::GetInterpolationLocation(const int32 Index)
 {
 	if (Index <= InterpLocations.Num())
 	{
@@ -926,7 +926,7 @@ void AShooterCharacter::ReleaseClip()
 	EquippedWeapon->SetMovingClip(false);
 }
 
-int32 AShooterCharacter::GetInterpLocationIndex()
+int32 AShooterCharacter::GetInterpolationLocationIndex()
 {
 	int32 LowestIndex = 1;
 	int32 LowestCount = INT_MAX;
@@ -943,7 +943,7 @@ int32 AShooterCharacter::GetInterpLocationIndex()
 	return LowestIndex;
 }
 
-void AShooterCharacter::IncrementInterpLocationItemCount(int32 Index, int32 Amount)
+void AShooterCharacter::IncrementInterpolationLocationItemCount(const int32 Index, const int32 Amount)
 {
 	if (Amount < -1 || Amount > 1)
 	{

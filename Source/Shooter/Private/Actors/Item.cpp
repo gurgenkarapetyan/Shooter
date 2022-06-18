@@ -212,8 +212,8 @@ void AItem::StartItemCurve(AShooterCharacter* Character)
 {
 	ShooterCharacterRef = Character;
 
-	InterpolationLocationIndex = Character->GetInterpLocationIndex();
-	Character->IncrementInterpLocationItemCount(InterpolationLocationIndex, 1);
+	InterpolationLocationIndex = Character->GetInterpolationLocationIndex();
+	Character->IncrementInterpolationLocationItemCount(InterpolationLocationIndex, 1);
 	
 	if (PickUpSound)
 	{
@@ -238,7 +238,7 @@ void AItem::FinishInterpolating()
 	bInterpolating = false;
 	if (ShooterCharacterRef)
 	{
-		ShooterCharacterRef->IncrementInterpLocationItemCount(InterpolationLocationIndex, -1);
+		ShooterCharacterRef->IncrementInterpolationLocationItemCount(InterpolationLocationIndex, -1);
 		ShooterCharacterRef->GetPickupItem(this);
 	}
 	SetActorScale3D(FVector(1.f));
@@ -314,9 +314,9 @@ FVector AItem::GetInterpolationLocation() const
 	switch (ItemType)
 	{
 	case EItemType::EIT_Ammo:
-		return ShooterCharacterRef->GetInterpLocation(InterpolationLocationIndex).SceneComponent->GetComponentLocation();
+		return ShooterCharacterRef->GetInterpolationLocation(InterpolationLocationIndex).SceneComponent->GetComponentLocation();
 	case EItemType::EIT_Weapn:
-		return ShooterCharacterRef->GetInterpLocation(0).SceneComponent->GetComponentLocation();
+		return ShooterCharacterRef->GetInterpolationLocation(0).SceneComponent->GetComponentLocation();
 	default:
 		break;
 	}

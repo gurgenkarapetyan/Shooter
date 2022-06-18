@@ -56,12 +56,12 @@ public:
 
 	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 
-	FInterpLocation GetInterpLocation(int32 Index);
+	FInterpLocation GetInterpolationLocation(const int32 Index);
 
-	/** Return the index in InterpLocations array with the lowest ItemCount. */
-	int32 GetInterpLocationIndex();
+	/** Return the index in InterpolationLocations array with the lowest ItemCount. */
+	int32 GetInterpolationLocationIndex();
 
-	void IncrementInterpLocationItemCount(int32 Index, int32 Amount);
+	void IncrementInterpolationLocationItemCount(const int32 Index, const int32 Amount);
 	
 	/** Adds/Subtracts to/from OverlappedItemCount and updates bShouldTraceForItems. */
 	void UpdateOverlappedItemCountValue(const int8 Amount);
