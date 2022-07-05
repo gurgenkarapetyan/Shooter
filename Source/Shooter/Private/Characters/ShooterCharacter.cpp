@@ -315,9 +315,10 @@ void AShooterCharacter::TraceForItems()
 			if (TraceHitItem && TraceHitItem->GetPickUpWidget())
 			{
 				TraceHitItem->GetPickUpWidget()->SetVisibility(true);
+				TraceHitItem->CustomDepthEnabled(true);
 			}
 
-			// We hit an AItem last fram
+			// We hit an AItem last frame
 			if (TraceHitItemLastFrame)
 			{
 				if (TraceHitItem != TraceHitItemLastFrame)
@@ -325,6 +326,7 @@ void AShooterCharacter::TraceForItems()
 					// We are hitting a different AItem this frame from last frame
 					// Or AItem is null this frame
 					TraceHitItemLastFrame->GetPickUpWidget()->SetVisibility(false);
+					TraceHitItemLastFrame->CustomDepthEnabled(false);
 				}
 			}
 
@@ -337,6 +339,7 @@ void AShooterCharacter::TraceForItems()
 		// No longer overlapping any items,
 		// Item last frame should not show widget
 		TraceHitItemLastFrame->GetPickUpWidget()->SetVisibility(false);
+		TraceHitItemLastFrame->CustomDepthEnabled(false);
 	}
 }
 

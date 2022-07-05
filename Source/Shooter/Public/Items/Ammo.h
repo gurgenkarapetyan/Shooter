@@ -24,6 +24,8 @@ public:
 	FORCEINLINE UStaticMeshComponent* GetAmmoMesh() const { return AmmoMesh; }
 	FORCEINLINE EAmmoType GetAmmoType() const { return AmmoType; }
 
+	virtual void CustomDepthEnabled(const bool bEnableCustomDepth) const override;
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetItemProperties(EItemState State) override;

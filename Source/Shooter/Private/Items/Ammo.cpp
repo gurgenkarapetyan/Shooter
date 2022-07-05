@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Shooter/Public/Items/Ammo.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
@@ -87,4 +86,10 @@ void AAmmo::SetItemProperties(EItemState State)
 	default:
 		break;
 	}
+}
+
+void AAmmo::CustomDepthEnabled(const bool bEnableCustomDepth) const
+{
+	Super::CustomDepthEnabled(bEnableCustomDepth);
+	AmmoMesh->SetRenderCustomDepth(bEnableCustomDepth);
 }

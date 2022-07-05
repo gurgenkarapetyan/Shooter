@@ -40,6 +40,8 @@ public:
 	/** Called from the AShooterCharacter class. */
 	void StartItemCurve(AShooterCharacter* Character);
 	
+	virtual void CustomDepthEnabled(const bool bEnableCustomDepth) const;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -66,6 +68,8 @@ protected:
 
 	/** Get interpolation location base on the item type. */
 	FVector GetInterpolationLocation() const;
+	
+	virtual void InitializeCustomDepth();
 
 private:
 	/** Skeleton mesh for the item. */
