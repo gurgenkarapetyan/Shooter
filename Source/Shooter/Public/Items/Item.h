@@ -187,6 +187,10 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 	UCurveVector* PulseCurve;
 
+	/** Interpolation Curve to drive the dynamic material parameters. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	UCurveVector* InterpolationPulseCurve;
+
 	FTimerHandle PulseTimer;
 
 	/** Time for the PulseTimer. */

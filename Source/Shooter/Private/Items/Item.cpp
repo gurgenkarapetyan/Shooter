@@ -284,6 +284,8 @@ void AItem::StartItemCurve(AShooterCharacter* Character)
 	ItemInterpolationStartLocation = GetActorLocation();
 	bInterpolating = true;
 	SetItemState(EItemState::EIS_EquipInterping);
+
+	GetWorldTimerManager().ClearTimer(PulseTimer);
 	GetWorldTimerManager().SetTimer(ItemInterpolationTimer, this, &AItem::FinishInterpolating, ZCurveTime);
 	
 	// Get initial Yaw of the Camera
@@ -303,6 +305,7 @@ void AItem::FinishInterpolating()
 	{
 		ShooterCharacterRef->IncrementInterpolationLocationItemCount(InterpolationLocationIndex, -1);
 		ShooterCharacterRef->GetPickupItem(this);
+		SetItemState(EItemState::EIS_PickedUp);
 	}
 
 	SetActorScale3D(FVector(1.f));
@@ -399,16 +402,30 @@ FVector AItem::GetInterpolationLocation() const
 
 void AItem::UpdatePulse() const
 {
-	if (ItemState != EItemState::EIS_Pickup)
+	float ElapsedTime;
+	FVector CurveValue { };
+	
+	switch (ItemState)
 	{
-		return;
+		case EItemState::EIS_Pickup:
+			if (PulseCurve)
+			{
+				ElapsedTime = GetWorldTimerManager().GetTimerElapsed(PulseTimer);
+				CurveValue = PulseCurve->GetVectorValue(ElapsedTime);
+			}
+		break;
+		case EItemState::EIS_EquipInterping:
+			if (InterpolationPulseCurve)
+			{
+				ElapsedTime = GetWorldTimerManager().GetTimerElapsed(ItemInterpolationTimer);
+				CurveValue = InterpolationPulseCurve->GetVectorValue(ElapsedTime);
+			}
+		break;
+		default: break;
 	}
 
-	const float ElapsedTime{ GetWorldTimerManager().GetTimerElapsed(PulseTimer) };
-	if (PulseCurve)
+	if (DynamicMaterialInstance)
 	{
-		const FVector CurveValue{ PulseCurve->GetVectorValue(ElapsedTime) };
-		
 		DynamicMaterialInstance->SetScalarParameterValue(TEXT("Glow Amount"), CurveValue.X * GlowAmount);
 		DynamicMaterialInstance->SetScalarParameterValue(TEXT("Fresnel Exponenth"), CurveValue.Y * FresnelExponent);
 		DynamicMaterialInstance->SetScalarParameterValue(TEXT("Fresnel Reflect Fraction"), CurveValue.Z * FresnelReflectFraction);
