@@ -72,6 +72,8 @@ protected:
 	FVector GetInterpolationLocation() const;
 	
 	virtual void InitializeCustomDepth();
+	virtual void GlowMaterialEnabled(const bool bEnableGlowMaterial) const;
+
 
 private:
 	/** Skeleton mesh for the item. */
@@ -174,4 +176,6 @@ private:
 	/** Material instance used with the Dynamic Material Instance. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 	UMaterialInstance* MaterialInstance;
+	
+	bool bCanChangeCustomDepth;
 };

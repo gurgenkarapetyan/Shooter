@@ -26,7 +26,8 @@ AItem::AItem() :
 	InterpolationInitialYawOffset(0.f),
 	ItemType(EItemType::EIT_MAX),
 	InterpolationLocationIndex(0),
-	MaterialIndex(0)
+	MaterialIndex(0),
+	bCanChangeCustomDepth(true)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -213,7 +214,10 @@ void AItem::InitializeCustomDepth()
 
 void AItem::CustomDepthEnabled(const bool bEnableCustomDepth) const 
 {
-	ItemMesh->SetRenderCustomDepth(bEnableCustomDepth);
+	if (bCanChangeCustomDepth)
+	{
+		ItemMesh->SetRenderCustomDepth(bEnableCustomDepth);
+	}
 }
 
 void AItem::OnConstruction(const FTransform& MovieSceneBlends)
@@ -225,7 +229,19 @@ void AItem::OnConstruction(const FTransform& MovieSceneBlends)
 		DynamicMaterialInstance = UMaterialInstanceDynamic::Create(MaterialInstance, this);
 		ItemMesh->SetMaterial(MaterialIndex, DynamicMaterialInstance);
 	}
+
+	GlowMaterialEnabled(true);
 }
+
+void AItem::GlowMaterialEnabled(const bool bEnableGlowMaterial) const
+{
+	if (DynamicMaterialInstance)
+	{
+		const int32 ColorValue = bEnableGlowMaterial ? 0.5 : 1;
+		DynamicMaterialInstance->SetScalarParameterValue(TEXT("Glow Blend Alpha"), ColorValue);
+	}
+}
+
 
 void AItem::SetItemState(const EItemState State)
 {
@@ -256,6 +272,8 @@ void AItem::StartItemCurve(AShooterCharacter* Character)
 	const float ItemRotationYaw{ GetActorRotation().Yaw };
 	// Initial Yaw offset between Camera and Item
 	InterpolationInitialYawOffset = ItemRotationYaw - CameraRotationYaw;
+	
+	bCanChangeCustomDepth = false;
 }
 
 void AItem::FinishInterpolating()
@@ -266,7 +284,13 @@ void AItem::FinishInterpolating()
 		ShooterCharacterRef->IncrementInterpolationLocationItemCount(InterpolationLocationIndex, -1);
 		ShooterCharacterRef->GetPickupItem(this);
 	}
+
 	SetActorScale3D(FVector(1.f));
+
+	GlowMaterialEnabled(false);
+
+	bCanChangeCustomDepth = true;
+	CustomDepthEnabled(false);
 }
 
 // Called every frame
