@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Shooter/Public/Actors/Weapon.h"
+#include "Shooter/Public/Items/Weapon.h"
 
 AWeapon::AWeapon() :
 	ThrowWeaponTime(0.7f),

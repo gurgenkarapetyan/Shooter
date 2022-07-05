@@ -45,6 +45,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void OnConstruction(const FTransform& Transform) override;
 	
 	/** Called when overlapping AreaSphere. */
 	UFUNCTION()
@@ -160,4 +162,16 @@ private:
 	/** Index of the interpolation location this item is interpolating to. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 	int32 InterpolationLocationIndex;
+
+	/** Index for the material we would like to change at runtime. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	int32 MaterialIndex;
+
+	/** Dynamic instance that we can change runtime. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	UMaterialInstanceDynamic* DynamicMaterialInstance;
+
+	/** Material instance used with the Dynamic Material Instance. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	UMaterialInstance* MaterialInstance;
 };

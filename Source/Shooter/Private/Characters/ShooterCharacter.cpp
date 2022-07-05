@@ -13,8 +13,8 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "Shooter/Public/Actors/Item.h"
-#include "Shooter/Public/Actors/Weapon.h"
+#include "Shooter/Public/Items//Item.h"
+#include "Shooter/Public/Items//Weapon.h"
 #include "Shooter/Public/Items/Ammo.h"
 
 AShooterCharacter::AShooterCharacter() :

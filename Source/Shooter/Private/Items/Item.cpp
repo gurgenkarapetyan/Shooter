@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Shooter/Public/Actors/Item.h"
+#include "Shooter/Public/Items/Item.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
@@ -25,7 +25,8 @@ AItem::AItem() :
 	ItemInterpolationY(0.f),
 	InterpolationInitialYawOffset(0.f),
 	ItemType(EItemType::EIT_MAX),
-	InterpolationLocationIndex(0)
+	InterpolationLocationIndex(0),
+	MaterialIndex(0)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -205,6 +206,27 @@ void AItem::SetItemProperties(const EItemState State)
 	}
 }
 
+void AItem::InitializeCustomDepth()
+{
+	CustomDepthEnabled(false);
+}
+
+void AItem::CustomDepthEnabled(const bool bEnableCustomDepth) const 
+{
+	ItemMesh->SetRenderCustomDepth(bEnableCustomDepth);
+}
+
+void AItem::OnConstruction(const FTransform& MovieSceneBlends)
+{
+	Super::OnConstruction(MovieSceneBlends);
+
+	if (MaterialInstance)
+	{
+		DynamicMaterialInstance = UMaterialInstanceDynamic::Create(MaterialInstance, this);
+		ItemMesh->SetMaterial(MaterialIndex, DynamicMaterialInstance);
+	}
+}
+
 void AItem::SetItemState(const EItemState State)
 {
 	ItemState = State;
@@ -325,14 +347,4 @@ FVector AItem::GetInterpolationLocation() const
 	}
 	
 	return FVector();
-}
-
-void AItem::CustomDepthEnabled(const bool bEnableCustomDepth) const 
-{
-	ItemMesh->SetRenderCustomDepth(bEnableCustomDepth);
-}
-
-void AItem::InitializeCustomDepth()
-{
-	CustomDepthEnabled(false);
 }
