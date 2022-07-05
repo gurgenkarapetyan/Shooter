@@ -7,6 +7,7 @@
 #include "Components/WidgetComponent.h"
 #include "Shooter/Public/Characters/ShooterCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Curves/CurveVector.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 
@@ -27,7 +28,12 @@ AItem::AItem() :
 	ItemType(EItemType::EIT_MAX),
 	InterpolationLocationIndex(0),
 	MaterialIndex(0),
-	bCanChangeCustomDepth(true)
+	bCanChangeCustomDepth(true),
+	// Dynamic Material Parameters
+	PulseCurveTime(5.f),
+	GlowAmount(150.f),
+	FresnelExponent(3.f),
+	FresnelReflectFraction(4.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -64,6 +70,8 @@ void AItem::BeginPlay()
 
 	// Set custom depth to disabled
 	InitializeCustomDepth();
+
+	StartPulseTimer();
 }
 
 void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
@@ -212,6 +220,19 @@ void AItem::InitializeCustomDepth()
 	CustomDepthEnabled(false);
 }
 
+void AItem::StartPulseTimer()
+{
+	if (ItemState == EItemState::EIS_Pickup)
+	{
+		GetWorldTimerManager().SetTimer(PulseTimer, this, &AItem::ResetPulseTimer, PulseCurveTime);
+	}
+}
+
+void AItem::ResetPulseTimer()
+{
+	StartPulseTimer();
+}
+
 void AItem::CustomDepthEnabled(const bool bEnableCustomDepth) const 
 {
 	if (bCanChangeCustomDepth)
@@ -241,7 +262,6 @@ void AItem::GlowMaterialEnabled(const bool bEnableGlowMaterial) const
 		DynamicMaterialInstance->SetScalarParameterValue(TEXT("Glow Blend Alpha"), ColorValue);
 	}
 }
-
 
 void AItem::SetItemState(const EItemState State)
 {
@@ -298,7 +318,11 @@ void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// Handle Item Interpolating when in the EquipInterping state
 	ItemInterpolation(DeltaTime);
+
+	// Get curve values from PulseCurve and set dynamic material parameters
+	UpdatePulse();
 }
 
 void AItem::ItemInterpolation(const float DeltaTime)
@@ -371,4 +395,22 @@ FVector AItem::GetInterpolationLocation() const
 	}
 	
 	return FVector();
+}
+
+void AItem::UpdatePulse() const
+{
+	if (ItemState != EItemState::EIS_Pickup)
+	{
+		return;
+	}
+
+	const float ElapsedTime{ GetWorldTimerManager().GetTimerElapsed(PulseTimer) };
+	if (PulseCurve)
+	{
+		const FVector CurveValue{ PulseCurve->GetVectorValue(ElapsedTime) };
+		
+		DynamicMaterialInstance->SetScalarParameterValue(TEXT("Glow Amount"), CurveValue.X * GlowAmount);
+		DynamicMaterialInstance->SetScalarParameterValue(TEXT("Fresnel Exponenth"), CurveValue.Y * FresnelExponent);
+		DynamicMaterialInstance->SetScalarParameterValue(TEXT("Fresnel Reflect Fraction"), CurveValue.Z * FresnelReflectFraction);
+	}
 }

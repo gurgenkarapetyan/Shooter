@@ -139,6 +139,9 @@ void AShooterCharacter::BeginPlay()
 	}
 
 	EquipWeapon(SpawnDefaultWeapon());
+	EquippedWeapon->CustomDepthEnabled(false);
+	EquippedWeapon->GlowMaterialEnabled(false);
+	
 	InitializeAmmoMap();
 	GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
 	InitializeInterpolationLocations();

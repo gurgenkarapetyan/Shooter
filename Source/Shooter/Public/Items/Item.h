@@ -13,6 +13,7 @@ class UWidgetComponent;
 class USphereComponent;
 class AShooterCharacter;
 class USoundCue;
+class UCurveVector;
 
 UCLASS()
 class SHOOTER_API AItem : public AActor
@@ -41,6 +42,7 @@ public:
 	void StartItemCurve(AShooterCharacter* Character);
 	
 	virtual void CustomDepthEnabled(const bool bEnableCustomDepth) const;
+	virtual void GlowMaterialEnabled(const bool bEnableGlowMaterial) const;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -72,8 +74,10 @@ protected:
 	FVector GetInterpolationLocation() const;
 	
 	virtual void InitializeCustomDepth();
-	virtual void GlowMaterialEnabled(const bool bEnableGlowMaterial) const;
 
+	void StartPulseTimer();
+	void ResetPulseTimer();
+	void UpdatePulse() const;
 
 private:
 	/** Skeleton mesh for the item. */
@@ -178,4 +182,23 @@ private:
 	UMaterialInstance* MaterialInstance;
 	
 	bool bCanChangeCustomDepth;
+
+	/** Curve to drive the dynamic material parameters. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	UCurveVector* PulseCurve;
+
+	FTimerHandle PulseTimer;
+
+	/** Time for the PulseTimer. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	float PulseCurveTime;
+
+	UPROPERTY(VisibleAnywhere, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	float GlowAmount;
+
+	UPROPERTY(VisibleAnywhere, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	float FresnelExponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	float FresnelReflectFraction;
 };
