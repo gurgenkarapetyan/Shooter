@@ -31,11 +31,15 @@ public:
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 	FORCEINLINE UBoxComponent* GetCollisionBox() const { return CollisionBox; }
 	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return  ItemMesh; }
+
 	FORCEINLINE EItemState GetItemState() const { return ItemState; }
 	FORCEINLINE USoundCue* GetPickUpSound() const { return PickUpSound; }
 	FORCEINLINE USoundCue* GetEquipSound() const { return EquipSound; }
-	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
 
+	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
+	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
+	FORCEINLINE void SetSlotIndex(const int32 Index) { SlotIndex = Index; }
+	
 	void SetItemState(EItemState State);
 
 	/** Called from the AShooterCharacter class. */
@@ -217,4 +221,8 @@ private:
 	/** Ammo Icon for this item in the inventory. */	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	UTexture2D* AmmoIcon;
+
+	/** Slot in the inventory array. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	int32 SlotIndex;
 };

@@ -30,6 +30,8 @@ struct FInterpLocation
 };
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEquipItemDelegate, int32, CurrentSlotIndex, int32, NewSlotIndex);
+
 UCLASS()
 class SHOOTER_API AShooterCharacter : public ACharacter
 {
@@ -251,6 +253,15 @@ private:
 	/** Create FInterLocation structs for each interpolation location. Add to the array. */
 	void InitializeInterpolationLocations();
 
+	void FKeyPressed();
+	void OneKeyPressed();
+	void TwoKeyPressed();
+	void ThreeKeyPressed();
+	void FourKeyPressed();
+	void FiveKeyPressed();
+	
+	void ExchangeInventoryItems(const int32 CurrentItemIndex, const int32 NewItemIndex);
+	
 private:
 	/** Camera boom positioning the camera behind the character. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta=(AllowPrivateAccess = "true"))
@@ -498,5 +509,9 @@ private:
 	TArray<AItem*> Inventory;
 
 	const int32 INVENTORY_CAPACITY = 6;
+
+	/** Delegate for sending slot information to InventoryBar when equipping. */
+	UPROPERTY(BlueprintAssignable, Category = "Delegates", meta = (AllowPrivateAccess = "true"))
+	FEquipItemDelegate EquipItemDelegate;
 };
 
