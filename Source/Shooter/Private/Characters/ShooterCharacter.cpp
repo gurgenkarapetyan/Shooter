@@ -139,6 +139,7 @@ void AShooterCharacter::BeginPlay()
 	}
 
 	EquipWeapon(SpawnDefaultWeapon());
+	Inventory.Add(EquippedWeapon);
 	EquippedWeapon->CustomDepthEnabled(false);
 	EquippedWeapon->GlowMaterialEnabled(false);
 	
@@ -869,7 +870,14 @@ void AShooterCharacter::GetPickupItem(AItem* Item)
 	const auto Weapon = Cast<AWeapon>(Item);
 	if (Weapon)
 	{
-		SwapWeapon(Weapon);
+		if (Inventory.Num() < INVENTORY_CAPACITY)
+		{
+			Inventory.Add(Weapon);
+		}
+		else
+		{
+			SwapWeapon(Weapon);
+		}
 	}
 
 	const auto Ammo = Cast<AAmmo>(Item);
