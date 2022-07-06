@@ -41,6 +41,8 @@ public:
 	FORCEINLINE void SetSlotIndex(const int32 Index) { SlotIndex = Index; }
 
 	FORCEINLINE void SetCharacter(AShooterCharacter* ShooterCharacter) { ShooterCharacterRef = ShooterCharacter;} 
+
+	FORCEINLINE void SetCharacterInventoryFull(const bool bFull) { bCharacterInventroyFull = bFull; }
 	
 	void SetItemState(EItemState State);
 
@@ -231,4 +233,8 @@ private:
 	/** Slot in the inventory array. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	int32 SlotIndex;
+
+	/** True when the Character inventory is full. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	bool bCharacterInventroyFull;
 };

@@ -155,7 +155,7 @@ void AShooterCharacter::BeginPlay()
 	InitializeInterpolationLocations();
 }
 
-void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
+void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip, const bool bSwapping)
 {
 	if (!WeaponToEquip)
 	{
@@ -176,7 +176,7 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 		// -1 == no EquippedWeapon yet. No need to reverse the icon animation
 		EquipItemDelegate.Broadcast(-1, WeaponToEquip->GetSlotIndex());
 	}
-	else
+	else if (!bSwapping)
 	{
 		EquipItemDelegate.Broadcast(EquippedWeapon->GetSlotIndex(), WeaponToEquip->GetSlotIndex());
 	}
@@ -342,6 +342,17 @@ void AShooterCharacter::TraceForItems()
 			{
 				TraceHitItem->GetPickUpWidget()->SetVisibility(true);
 				TraceHitItem->CustomDepthEnabled(true);
+
+				if (Inventory.Num() >= INVENTORY_CAPACITY)
+				{
+					// Inventory is full
+					TraceHitItem->SetCharacterInventoryFull(true);
+				}
+				else
+				{
+					// Inventory has room
+					TraceHitItem->SetCharacterInventoryFull(false);
+				}
 			}
 
 			// We hit an AItem last frame
@@ -933,9 +944,10 @@ void AShooterCharacter::FiveKeyPressed()
 
 void AShooterCharacter::ExchangeInventoryItems(const int32 CurrentItemIndex, const int32 NewItemIndex)
 {
-	if (CurrentItemIndex == NewItemIndex || NewItemIndex >= Inventory.Num() || CombatState != ECombatState::ECS_Unoccupied)
+	const bool bCanExchangeItems = CurrentItemIndex != NewItemIndex && NewItemIndex < Inventory.Num() && (CombatState == ECombatState::ECS_Unoccupied || CombatState == ECombatState::ECS_Equipping);
+	if (!bCanExchangeItems)
 	{
-		return;
+		return; 
 	}
 
 	const auto OldEquippedWeapon = EquippedWeapon;
@@ -1020,7 +1032,7 @@ void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
 	}
 	
 	DropWeapon();
-	EquipWeapon(WeaponToSwap);
+	EquipWeapon(WeaponToSwap, true);
 	TraceHitItem = nullptr;
 	TraceHitItemLastFrame = nullptr;
 }
