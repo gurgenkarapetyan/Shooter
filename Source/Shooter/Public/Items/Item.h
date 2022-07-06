@@ -39,11 +39,15 @@ public:
 	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
 	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
 	FORCEINLINE void SetSlotIndex(const int32 Index) { SlotIndex = Index; }
+
+	FORCEINLINE void SetCharacter(AShooterCharacter* ShooterCharacter) { ShooterCharacterRef = ShooterCharacter;} 
 	
 	void SetItemState(EItemState State);
 
 	/** Called from the AShooterCharacter class. */
-	void StartItemCurve(AShooterCharacter* Character);
+	void StartItemCurve(AShooterCharacter* Character, bool bForcePlaySound = false);
+
+	void PlayEquipSound(const bool bForcePlaySound = false) const;
 	
 	virtual void CustomDepthEnabled(const bool bEnableCustomDepth) const;
 	virtual void GlowMaterialEnabled(const bool bEnableGlowMaterial) const;
@@ -67,6 +71,8 @@ protected:
 
 	/** Sets properties of the Item's components based on State. */
 	virtual void SetItemProperties(EItemState State);
+
+	void PlayPickupSound(const bool bForcePlaySound = false) const;
 	
 	/** Called when ItemInterpolationTimer is Finished. */
 	void FinishInterpolating();

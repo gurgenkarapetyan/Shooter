@@ -53,6 +53,9 @@ public:
 	FORCEINLINE bool GetAiming() const { return bAiming; }
 	/** Returns crouching true/false. */
 	FORCEINLINE bool GetCrouching() const { return bCrouching; }
+
+	FORCEINLINE bool ShouldPlayPickupSound() const { return bShouldPlayPickupSound; }
+	FORCEINLINE bool ShouldPlayEquipSound() const { return bShouldPlayEquipSound; }
 	
 	FORCEINLINE int8 GetOverlappedItemCount() const { return OverlappedItemCount; }
 
@@ -72,6 +75,9 @@ public:
 	float GetCrosshairSpreadMultiplier() const;
 	
 	void GetPickupItem(AItem* Item);
+
+	void StartPickupSoundTimer();
+	void StartEquipSoundTimer();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -253,6 +259,9 @@ private:
 	*/
 	void CalculateCrosshairFiringFactor(const float DeltaTime, float& CrosshairShooting) const;
 
+	void ResetPickupSoundTimer();
+	void ResetEquipSoundTimer();
+	
 	/** Create FInterLocation structs for each interpolation location. Add to the array. */
 	void InitializeInterpolationLocations();
 
@@ -520,5 +529,19 @@ private:
 	/** Delegate for sending slot information to InventoryBar when equipping. */
 	UPROPERTY(BlueprintAssignable, Category = "Delegates", meta = (AllowPrivateAccess = "true"))
 	FEquipItemDelegate EquipItemDelegate;
+	
+	bool bShouldPlayPickupSound;
+	bool bShouldPlayEquipSound;
+
+	/** Time to wait before we can play another Pickup Sound */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	float PickupSoundResetTime;
+
+	/** Time to wait before we can play another Equip Sound */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	float EquipSoundResetTime;
+
+	FTimerHandle PickupSoundTimer;
+	FTimerHandle EquipSoundTimer;
 };
 

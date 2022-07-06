@@ -285,17 +285,14 @@ void AItem::SetItemState(const EItemState State)
 	SetItemProperties(State);
 }
 
-void AItem::StartItemCurve(AShooterCharacter* Character)
+void AItem::StartItemCurve(AShooterCharacter* Character, bool bForcePlaySound)
 {
 	ShooterCharacterRef = Character;
 
 	InterpolationLocationIndex = Character->GetInterpolationLocationIndex();
 	Character->IncrementInterpolationLocationItemCount(InterpolationLocationIndex, 1);
 	
-	if (PickUpSound)
-	{
-		UGameplayStatics::PlaySound2D(this, PickUpSound);
-	}
+	PlayPickupSound(bForcePlaySound);
 	
 	ItemInterpolationStartLocation = GetActorLocation();
 	bInterpolating = true;
@@ -312,6 +309,25 @@ void AItem::StartItemCurve(AShooterCharacter* Character)
 	InterpolationInitialYawOffset = ItemRotationYaw - CameraRotationYaw;
 	
 	bCanChangeCustomDepth = false;
+}
+
+void AItem::PlayPickupSound(const bool bForcePlaySound) const
+{
+	if (ShooterCharacterRef == nullptr || PickUpSound == nullptr)
+	{
+		return;
+	}
+	
+	if (bForcePlaySound)
+	{
+		UGameplayStatics::PlaySound2D(this, PickUpSound);
+	}
+	else if (ShooterCharacterRef->ShouldPlayPickupSound())
+	{
+		ShooterCharacterRef->StartPickupSoundTimer();
+		UGameplayStatics::PlaySound2D(this, PickUpSound);
+	}
+	
 }
 
 void AItem::FinishInterpolating()
@@ -446,3 +462,22 @@ void AItem::UpdatePulse() const
 		DynamicMaterialInstance->SetScalarParameterValue(TEXT("Fresnel Reflect Fraction"), CurveValue.Z * FresnelReflectFraction);
 	}
 }
+
+void AItem::PlayEquipSound(const bool bForcePlaySound) const
+{
+	if (ShooterCharacterRef == nullptr || EquipSound == nullptr)
+	{
+		return;
+	}
+	
+	if (bForcePlaySound)
+	{
+		UGameplayStatics::PlaySound2D(this, EquipSound);
+	}
+	else if (ShooterCharacterRef->ShouldPlayEquipSound())
+	{
+		ShooterCharacterRef->StartEquipSoundTimer();
+		UGameplayStatics::PlaySound2D(this, EquipSound);
+	}
+}
+

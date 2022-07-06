@@ -67,7 +67,12 @@ AShooterCharacter::AShooterCharacter() :
 	CrouchingCapsuleHalfHeight(44.f),
 	BaseGroundFriction(2.f),
 	CrouchingGroundFriction(100.f),
-	bAimingButtonPressed(false)
+	bAimingButtonPressed(false),
+	// Pickup sound timer properties
+	bShouldPlayPickupSound(true),
+	bShouldPlayEquipSound(true),
+	PickupSoundResetTime(0.2f),
+	EquipSoundResetTime(0.2f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -143,6 +148,7 @@ void AShooterCharacter::BeginPlay()
 	EquippedWeapon->SetSlotIndex(0);
 	EquippedWeapon->CustomDepthEnabled(false);
 	EquippedWeapon->GlowMaterialEnabled(false);
+	EquippedWeapon->SetCharacter(this);
 	
 	InitializeAmmoMap();
 	GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
@@ -724,7 +730,7 @@ void AShooterCharacter::SelectButtonPressed()
 	
 	if (TraceHitItem)
 	{
-		TraceHitItem->StartItemCurve(this);
+		TraceHitItem->StartItemCurve(this, true);
 		TraceHitItem = nullptr;
 	}
 }
@@ -946,6 +952,8 @@ void AShooterCharacter::ExchangeInventoryItems(const int32 CurrentItemIndex, con
 		AnimInstance->Montage_Play(EquipMontage, 1.0f);
 		AnimInstance->Montage_JumpToSection(FName("Equip"));
 	}
+
+	NewWeapon->PlayEquipSound(true);
 }
 
 FInterpLocation AShooterCharacter::GetInterpolationLocation(const int32 Index)
@@ -979,10 +987,7 @@ float AShooterCharacter::GetCrosshairSpreadMultiplier() const
 
 void AShooterCharacter::GetPickupItem(AItem* Item)
 {
-	if (Item->GetEquipSound())
-	{
-		UGameplayStatics::PlaySound2D(this, Item->GetEquipSound());
-	}
+	Item->PlayEquipSound();
 
 	const auto Weapon = Cast<AWeapon>(Item);
 	if (Weapon)
@@ -1096,3 +1101,27 @@ void AShooterCharacter::IncrementInterpolationLocationItemCount(const int32 Inde
 		InterpLocations[Index].ItemCount += Amount;
 	}
 }
+
+void AShooterCharacter::StartPickupSoundTimer()
+{
+	bShouldPlayPickupSound = false;
+	GetWorldTimerManager().SetTimer(PickupSoundTimer, this, &AShooterCharacter::ResetPickupSoundTimer, PickupSoundResetTime);
+}
+
+void AShooterCharacter::ResetPickupSoundTimer()
+{
+	bShouldPlayPickupSound = true;
+}
+
+void AShooterCharacter::StartEquipSoundTimer()
+{
+	bShouldPlayEquipSound = false;
+	GetWorldTimerManager().SetTimer(PickupSoundTimer,this, &AShooterCharacter::ResetEquipSoundTimer,EquipSoundResetTime);
+}
+
+
+void AShooterCharacter::ResetEquipSoundTimer()
+{
+	bShouldPlayEquipSound = true;
+}
+
