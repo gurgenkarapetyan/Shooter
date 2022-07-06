@@ -29,8 +29,8 @@ struct FInterpLocation
 	int32 ItemCount;
 };
 
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEquipItemDelegate, int32, CurrentSlotIndex, int32, NewSlotIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FHighlightIconDelegate, int32, SlotIndex, bool, bStartAnimation);
 
 UCLASS()
 class SHOOTER_API AShooterCharacter : public ACharacter
@@ -78,6 +78,8 @@ public:
 
 	void StartPickupSoundTimer();
 	void StartEquipSoundTimer();
+
+	void UnHighlightInventorySlot();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -273,6 +275,10 @@ private:
 	void FiveKeyPressed();
 	
 	void ExchangeInventoryItems(const int32 CurrentItemIndex, const int32 NewItemIndex);
+
+	int32 GetEmptyInventorySlot();
+
+	void HighlightInventorySlot();
 	
 private:
 	/** Camera boom positioning the camera behind the character. */
@@ -529,6 +535,14 @@ private:
 	/** Delegate for sending slot information to InventoryBar when equipping. */
 	UPROPERTY(BlueprintAssignable, Category = "Delegates", meta = (AllowPrivateAccess = "true"))
 	FEquipItemDelegate EquipItemDelegate;
+
+	/** Delegate for sending slot information for playing the icon animation. */
+	UPROPERTY(BlueprintAssignable, Category = "Delegates", meta = (AllowPrivateAccess = "true"))
+	FHighlightIconDelegate HighlightIconDelegate;
+
+	/** The index for the currently highlighted slot. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	int32 HighlightedSlot;
 	
 	bool bShouldPlayPickupSound;
 	bool bShouldPlayEquipSound;

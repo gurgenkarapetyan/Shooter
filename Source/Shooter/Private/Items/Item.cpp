@@ -96,6 +96,7 @@ void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 		if (ShooterCharacter)
 		{
 			ShooterCharacter->UpdateOverlappedItemCountValue(-1);
+			ShooterCharacterRef->UnHighlightInventorySlot();
 		}
 	}
 }
@@ -338,6 +339,7 @@ void AItem::FinishInterpolating()
 	{
 		ShooterCharacterRef->IncrementInterpolationLocationItemCount(InterpolationLocationIndex, -1);
 		ShooterCharacterRef->GetPickupItem(this);
+		ShooterCharacterRef->UnHighlightInventorySlot();
 	}
 
 	SetActorScale3D(FVector(1.f));
