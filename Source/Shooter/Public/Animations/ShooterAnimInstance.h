@@ -34,17 +34,20 @@ protected:
 	void Lean(float DeltaTime);
 	
 private:
-	/** Returns true if the character is in the air. */
-	bool IsCharacterInTheAir() const;
-
-	/** Returns true if the character is moving. */
-	bool IsCharacterAccelerating() const;
-
 	/** Returns true if the character is crouching. */
 	bool IsCharacterCrouching() const;
 	
 	/** Returns true if the character is reloading. */
 	bool IsCharacterReloading() const;
+
+	/** Returns true if the character is equipping. */
+	bool IsCharacterEquipping() const;
+	
+	/** Returns true if the character is in the air. */
+	bool IsCharacterInTheAir() const;
+
+	/** Returns true if the character is moving. */
+	bool IsCharacterAccelerating() const;
 
 	/** Returns true if the character is aiming. */
 	bool IsCharacterAiming() const;
@@ -132,6 +135,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Crouching", meta=(AllowPrivateAccess = "true"))
 	bool bCrouching;
 
+	/** True when equipping. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Crouching", meta=(AllowPrivateAccess = "true"))
+	bool bEquipping;
+	
 	/** Change the recoil weight based on turning in place and aiming. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta=(AllowPrivateAccess = "true"))
 	float RecoilWeight;

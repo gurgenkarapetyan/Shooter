@@ -44,6 +44,7 @@ void UShooterAnimInstance::UpdateAnimationProperties(const float DeltaTime)
 
 	bCrouching = IsCharacterCrouching();
 	bReloading = IsCharacterReloading();
+	bEquipping = IsCharacterEquipping();
 	bIsInAir = IsCharacterInTheAir();
 	bIsAccelerating = IsCharacterAccelerating();
 	bAiming = IsCharacterAiming();
@@ -57,16 +58,6 @@ void UShooterAnimInstance::UpdateAnimationProperties(const float DeltaTime)
 	Lean(DeltaTime);
 }
 
-bool UShooterAnimInstance::IsCharacterInTheAir() const
-{
-	return ShooterCharacter->GetCharacterMovement()->IsFalling();
-}
-
-bool UShooterAnimInstance::IsCharacterAccelerating() const
-{
-	return (ShooterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f);
-}
-
 bool UShooterAnimInstance::IsCharacterCrouching() const
 {
 	return ShooterCharacter->GetCrouching();
@@ -74,7 +65,22 @@ bool UShooterAnimInstance::IsCharacterCrouching() const
 
 bool UShooterAnimInstance::IsCharacterReloading() const
 {
-	return (ShooterCharacter->GetCombatState() == ECombatState::ECS_Reloading);
+	return ShooterCharacter->GetCombatState() == ECombatState::ECS_Reloading;
+}
+
+bool UShooterAnimInstance::IsCharacterEquipping() const
+{
+	return ShooterCharacter->GetCombatState() == ECombatState::ECS_Equipping;
+}
+
+bool UShooterAnimInstance::IsCharacterInTheAir() const
+{
+	return ShooterCharacter->GetCharacterMovement()->IsFalling();
+}
+
+bool UShooterAnimInstance::IsCharacterAccelerating() const
+{
+	return ShooterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f;
 }
 
 bool UShooterAnimInstance::IsCharacterAiming() const
@@ -180,17 +186,17 @@ void UShooterAnimInstance::SetRecoilWeight()
 {
 	if (bTurningInPlace)
 	{
-		bReloading ? RecoilWeight  = 1.f : RecoilWeight = 0.f;
+		(bReloading || bEquipping) ? RecoilWeight  = 1.f : RecoilWeight = 0.f;
 	}
 	else
 	{
 		if (bCrouching)
 		{
-			bReloading ? RecoilWeight  = 1.f : RecoilWeight = 0.1f;
+			(bReloading || bEquipping) ? RecoilWeight  = 1.f : RecoilWeight = 0.1f;
 		}
 		else
 		{
-			(bAiming || bReloading) ? RecoilWeight  = 1.f : RecoilWeight = 0.5f;
+			(bAiming || bReloading || bEquipping) ? RecoilWeight  = 1.f : RecoilWeight = 0.5f;
 		}
 	}
 }

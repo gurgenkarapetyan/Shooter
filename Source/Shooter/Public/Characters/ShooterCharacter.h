@@ -139,6 +139,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
 
+	UFUNCTION(BlueprintCallable)
+	void FinishEquipping();
+	
 	void CrouchButtonPressed();
 	
 	/** Line Trace for items under the crosshairs. */
@@ -436,6 +439,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* ReloadMontage;
 
+	/** Montage for Equip animations. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* EquipMontage;
+	
 	/** Transform of the clip when we first grab the clip during reloading. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	FTransform ClipTransform;

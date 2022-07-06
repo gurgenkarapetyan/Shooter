@@ -841,6 +841,11 @@ void AShooterCharacter::FinishReloading()
 	}
 }
 
+void AShooterCharacter::FinishEquipping()
+{
+	CombatState = ECombatState::ECS_Unoccupied;	
+}
+
 void AShooterCharacter::CrouchButtonPressed()
 {
 	if (!GetCharacterMovement()->IsFalling())
@@ -922,9 +927,7 @@ void AShooterCharacter::FiveKeyPressed()
 
 void AShooterCharacter::ExchangeInventoryItems(const int32 CurrentItemIndex, const int32 NewItemIndex)
 {
-	// if (CurrentItemIndex == NewItemIndex || NewItemIndex >= Inventory.Num() || CombatState != ECombatState::ECS_Unoccupied)
 	if (CurrentItemIndex == NewItemIndex || NewItemIndex >= Inventory.Num() || CombatState != ECombatState::ECS_Unoccupied)
-
 	{
 		return;
 	}
@@ -935,6 +938,14 @@ void AShooterCharacter::ExchangeInventoryItems(const int32 CurrentItemIndex, con
 	
 	OldEquippedWeapon->SetItemState(EItemState::EIS_PickedUp);
 	NewWeapon->SetItemState(EItemState::EIS_Equipped);
+
+	CombatState = ECombatState::ECS_Equipping;
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if(AnimInstance && EquipMontage)
+	{
+		AnimInstance->Montage_Play(EquipMontage, 1.0f);
+		AnimInstance->Montage_JumpToSection(FName("Equip"));
+	}
 }
 
 FInterpLocation AShooterCharacter::GetInterpolationLocation(const int32 Index)
