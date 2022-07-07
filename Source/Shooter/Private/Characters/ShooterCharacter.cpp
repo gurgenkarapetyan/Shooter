@@ -1018,8 +1018,9 @@ void AShooterCharacter::HighlightInventorySlot()
 
 void AShooterCharacter::UnHighlightInventorySlot()
 {
-	HighlightIconDelegate.Broadcast(HighlightedSlot, false);
-	HighlightedSlot = -1;
+	// TODO FIX OVERLAP BUG
+	//HighlightIconDelegate.Broadcast(HighlightedSlot, false);
+	//HighlightedSlot = -1;
 }
 
 FInterpLocation AShooterCharacter::GetInterpolationLocation(const int32 Index)

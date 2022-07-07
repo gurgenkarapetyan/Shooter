@@ -35,7 +35,7 @@ AItem::AItem() :
 	FresnelExponent(3.f),
 	FresnelReflectFraction(4.f),
 	SlotIndex(0),
-	bCharacterInventroyFull(false)
+	bCharacterInventoryFull(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -262,14 +262,56 @@ void AItem::CustomDepthEnabled(const bool bEnableCustomDepth) const
 void AItem::OnConstruction(const FTransform& MovieSceneBlends)
 {
 	Super::OnConstruction(MovieSceneBlends);
+	
+	// Load the data in the Item Rarity Table
+	// Path to the Item Rarity Data Table
+	const FString RarityTablePath(TEXT("DataTable'/Game/DataTable/ItemRarity_DataTable.ItemRarity_DataTable'"));
+	UDataTable* RarityTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RarityTablePath));
+	if (RarityTableObject)
+	{
+		FItemRarityTable* RarityRow = nullptr;
+		switch(ItemRarity)
+		{
+		case EItemRarity::EIR_Damaged:
+			RarityRow = RarityTableObject->FindRow<FItemRarityTable>(FName("Damaged"), TEXT(""));
+		break;
+		case EItemRarity::EIR_Common:
+			RarityRow = RarityTableObject->FindRow<FItemRarityTable>(FName("Common"), TEXT(""));
+		break;
+		case EItemRarity::EIR_Uncommon:
+			RarityRow = RarityTableObject->FindRow<FItemRarityTable>(FName("Uncommon"), TEXT(""));
+		break;
+		case EItemRarity::EIR_Rare:
+			RarityRow = RarityTableObject->FindRow<FItemRarityTable>(FName("Rare"), TEXT(""));
+		break;
+		case EItemRarity::EIR_Legendary:
+			RarityRow = RarityTableObject->FindRow<FItemRarityTable>(FName("Legendary"), TEXT(""));
+		break;
+		default:;
+		}
+
+		if (RarityRow)
+		{
+			GlowColor = RarityRow->GlowColor;
+			LightColor = RarityRow->LightColor;
+			DarkColor = RarityRow->DarkColor;
+			NumberOfStars = RarityRow->NumberOfStars;
+			IconBackground = RarityRow->IconBackground;
+			if (GetItemMesh())
+			{
+				GetItemMesh()->SetCustomDepthStencilValue(RarityRow->CustomDepthStencil);
+			}
+		}
+	}
 
 	if (MaterialInstance)
 	{
 		DynamicMaterialInstance = UMaterialInstanceDynamic::Create(MaterialInstance, this);
+		DynamicMaterialInstance->SetVectorParameterValue(TEXT("Fresnel Color"), GlowColor);
 		ItemMesh->SetMaterial(MaterialIndex, DynamicMaterialInstance);
-	}
 
-	GlowMaterialEnabled(true);
+		GlowMaterialEnabled(true);
+	}
 }
 
 void AItem::GlowMaterialEnabled(const bool bEnableGlowMaterial) const
