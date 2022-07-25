@@ -52,6 +52,15 @@ public:
 	FORCEINLINE void SetIconItem(UTexture2D* Icon) { IconItem = Icon; }
 	/** Set ammo icon for the inventory */
 	FORCEINLINE void SetAmmoIcon(UTexture2D* Icon) { AmmoIcon = Icon; }
+
+	FORCEINLINE UMaterialInstance* GetMaterialInstance() const { return MaterialInstance; }
+	FORCEINLINE void SetMaterialInstance(UMaterialInstance* Instance) { MaterialInstance = Instance; }
+	FORCEINLINE UMaterialInstanceDynamic* GetDynamicMaterialInstance() const { return DynamicMaterialInstance; }
+	FORCEINLINE void SetDynamicMaterialInstance(UMaterialInstanceDynamic* Instance) { DynamicMaterialInstance = Instance; }
+
+	FORCEINLINE FLinearColor GetGlowColor() const { return GlowColor; }
+	FORCEINLINE int32 GetMaterialIndex() const { return MaterialIndex; }
+	FORCEINLINE void SetMaterialIndex(const int32 Index) { MaterialIndex = Index; }
 	
 	FORCEINLINE void SetCharacter(AShooterCharacter* ShooterCharacter) { ShooterCharacterRef = ShooterCharacter;} 
 
