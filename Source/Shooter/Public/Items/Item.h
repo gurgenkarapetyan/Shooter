@@ -36,13 +36,23 @@ public:
 	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return  ItemMesh; }
 
 	FORCEINLINE EItemState GetItemState() const { return ItemState; }
+
 	FORCEINLINE USoundCue* GetPickUpSound() const { return PickUpSound; }
 	FORCEINLINE USoundCue* GetEquipSound() const { return EquipSound; }
+	FORCEINLINE void SetPickUpSound(USoundCue* Sound) { PickUpSound = Sound; }
+	FORCEINLINE void SetEquipSound(USoundCue* Sound) { EquipSound = Sound; }
 
 	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
 	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
 	FORCEINLINE void SetSlotIndex(const int32 Index) { SlotIndex = Index; }
 
+	FORCEINLINE void SetItemName(FString Name) { ItemName = Name; }
+
+	/** Set item icon for the inventory */
+	FORCEINLINE void SetIconItem(UTexture2D* Icon) { IconItem = Icon; }
+	/** Set ammo icon for the inventory */
+	FORCEINLINE void SetAmmoIcon(UTexture2D* Icon) { AmmoIcon = Icon; }
+	
 	FORCEINLINE void SetCharacter(AShooterCharacter* ShooterCharacter) { ShooterCharacterRef = ShooterCharacter;} 
 
 	FORCEINLINE void SetCharacterInventoryFull(const bool bFull) { bCharacterInventoryFull = bFull; }

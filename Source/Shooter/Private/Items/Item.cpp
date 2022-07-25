@@ -267,7 +267,7 @@ void AItem::OnConstruction(const FTransform& MovieSceneBlends)
 	// Load the data in the Item Rarity Table
 	// Path to the Item Rarity Data Table
 	const FString RarityTablePath(TEXT("DataTable'/Game/DataTable/ItemRarity_DataTable.ItemRarity_DataTable'"));
-	UDataTable* RarityTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RarityTablePath));
+	const UDataTable* RarityTableObject = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *RarityTablePath));
 	if (RarityTableObject)
 	{
 		FItemRarityTable* RarityRow = nullptr;

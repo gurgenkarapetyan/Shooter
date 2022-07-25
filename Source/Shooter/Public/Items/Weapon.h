@@ -38,7 +38,10 @@ public:
 	FORCEINLINE FName GetClipBoneName() const { return ClipBoneName; }
 
 	bool ClipIsFull() const;
+	
 protected:
+	virtual void OnConstruction(const FTransform& Transform) override;
+	
 	void StopFalling();
 	
 private:

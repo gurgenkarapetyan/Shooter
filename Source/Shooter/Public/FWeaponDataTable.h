@@ -27,10 +27,7 @@ struct FWeaponDataTable : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundCue* EquipSound;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UWidgetComponent* PickupWidget;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USkeletalMesh* ItemMesh;
 
