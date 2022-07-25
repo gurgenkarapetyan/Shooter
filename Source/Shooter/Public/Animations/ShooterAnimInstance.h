@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "Shooter/Library/OffsetStateEnumLibrary.h"
+#include "Shooter/Library/WeaponTypeEnumLibrary.h"
 #include "ShooterAnimInstance.generated.h"
 
 class AShooterCharacter;
@@ -146,4 +147,8 @@ private:
 	/** True when turning in place. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta=(AllowPrivateAccess = "true"))
 	bool bTurningInPlace;
+
+	/** Weapon type for the currently equipped weapon. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta=(AllowPrivateAccess = "true"))
+	EWeaponType EquippedWeaponType;
 };

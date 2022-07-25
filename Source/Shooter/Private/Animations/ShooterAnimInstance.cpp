@@ -3,6 +3,7 @@
 #include "Shooter/Public/Animations/ShooterAnimInstance.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Items/Weapon.h"
 #include "Shooter/Public/Player/ShooterCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -54,6 +55,13 @@ void UShooterAnimInstance::UpdateAnimationProperties(const float DeltaTime)
 	CalculateMovementOffsetYaw();
 
 	SetOffsetState();
+
+	// Check if ShooterCharacter has a valid EquippedWeapon
+	if (ShooterCharacter->GetEquippedWeapon())
+	{
+		EquippedWeaponType = ShooterCharacter->GetEquippedWeapon()->GetWeaponType();
+	}
+	
 	TurnInPlace();
 	Lean(DeltaTime);
 }

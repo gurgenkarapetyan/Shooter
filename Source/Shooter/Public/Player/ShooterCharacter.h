@@ -61,6 +61,8 @@ public:
 
 	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 
+	FORCEINLINE AWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
+	
 	FInterpLocation GetInterpolationLocation(const int32 Index);
 
 	/** Return the index in InterpolationLocations array with the lowest ItemCount. */
