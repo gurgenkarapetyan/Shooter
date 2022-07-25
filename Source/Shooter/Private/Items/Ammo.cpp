@@ -4,7 +4,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
-#include "Shooter/Public/Characters/ShooterCharacter.h"
+#include "Shooter/Public/Player/ShooterCharacter.h"
 
 AAmmo::AAmmo()
 {

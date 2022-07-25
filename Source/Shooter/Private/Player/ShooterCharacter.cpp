@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Shooter/Public/Characters/ShooterCharacter.h"
-
+#include "Shooter/Public/Player/ShooterCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"

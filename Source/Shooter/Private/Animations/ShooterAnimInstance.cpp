@@ -3,7 +3,7 @@
 #include "Shooter/Public/Animations/ShooterAnimInstance.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Shooter/Public/Characters/ShooterCharacter.h"
+#include "Shooter/Public/Player/ShooterCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
 
 UShooterAnimInstance::UShooterAnimInstance() :

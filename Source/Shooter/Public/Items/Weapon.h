@@ -75,4 +75,8 @@ private:
 	/** True when moving the clip when reloading. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Properties", meta = (AllowPrivateAccess = "true"))
 	bool bMovingClip;
+
+	/** DataTable for weapon properties. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
+	UDataTable* WeaponDataTable;
 };

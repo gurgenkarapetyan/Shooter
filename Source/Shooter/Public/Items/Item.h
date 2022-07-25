@@ -16,29 +16,7 @@ class AShooterCharacter;
 class USoundCue;
 class UCurveVector;
 
-USTRUCT(BlueprintType)
-struct FItemRarityTable : public FTableRowBase
-{
-	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FLinearColor GlowColor;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FLinearColor LightColor;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FLinearColor DarkColor;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 NumberOfStars;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UTexture2D* IconBackground;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 CustomDepthStencil;
-};
 
 UCLASS()
 class SHOOTER_API AItem : public AActor

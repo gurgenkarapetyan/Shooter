@@ -2,10 +2,11 @@
 
 #include "Shooter/Public/Items/Item.h"
 
+#include "FItemRarityTable.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
-#include "Shooter/Public/Characters/ShooterCharacter.h"
+#include "Shooter/Public/Player/ShooterCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Curves/CurveVector.h"
 #include "Kismet/GameplayStatics.h"
