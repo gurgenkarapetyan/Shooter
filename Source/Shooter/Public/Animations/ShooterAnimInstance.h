@@ -53,6 +53,8 @@ private:
 	/** Returns true if the character is aiming. */
 	bool IsCharacterAiming() const;
 
+	bool ShouldUseFABRIK() const;
+
 	/**
 	* Set the lateral speed of the character from the velocity.
 	* @param CharacterSpeed passing by reference and setting the speed value.
@@ -151,4 +153,8 @@ private:
 	/** Weapon type for the currently equipped weapon. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta=(AllowPrivateAccess = "true"))
 	EWeaponType EquippedWeaponType;
+
+	/** True when not reloading or equipping. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta=(AllowPrivateAccess = "true"))
+	bool bShouldUseFABRIK;
 };

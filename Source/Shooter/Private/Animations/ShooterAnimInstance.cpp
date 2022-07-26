@@ -24,7 +24,9 @@ UShooterAnimInstance::UShooterAnimInstance() :
 	YawDelta(0.f),
 	bCrouching(false),
 	RecoilWeight(0.f),
-	bTurningInPlace(false)
+	bTurningInPlace(false),
+	EquippedWeaponType(EWeaponType::EWT_MAX),
+	bShouldUseFABRIK(false)
 {
 	
 }
@@ -49,6 +51,7 @@ void UShooterAnimInstance::UpdateAnimationProperties(const float DeltaTime)
 	bIsInAir = IsCharacterInTheAir();
 	bIsAccelerating = IsCharacterAccelerating();
 	bAiming = IsCharacterAiming();
+	bShouldUseFABRIK = ShouldUseFABRIK();
 	
 	SetCharacterSpeed(Speed);
 
@@ -94,6 +97,11 @@ bool UShooterAnimInstance::IsCharacterAccelerating() const
 bool UShooterAnimInstance::IsCharacterAiming() const
 {
 	return  ShooterCharacter->GetAiming();
+}
+
+bool UShooterAnimInstance::ShouldUseFABRIK() const
+{
+	return ShooterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied || ShooterCharacter->GetCombatState() == ECombatState::ECS_FireTimerInProgress;
 }
 
 void UShooterAnimInstance::SetCharacterSpeed(float& CharacterSpeed) const
