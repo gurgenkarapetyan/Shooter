@@ -34,6 +34,7 @@ public:
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 	FORCEINLINE EAmmoType GetAmmoType() const { return AmmoType; }
 
+	FORCEINLINE void SetReloadMontageSection(const FName Name) { ReloadMontageSection = Name; }
 	FORCEINLINE FName GetReloadMontageSection() const { return ReloadMontageSection; }
 	FORCEINLINE void SetClipBoneName(const FName Name) { ClipBoneName = Name; }
 	FORCEINLINE FName GetClipBoneName() const { return ClipBoneName; }
