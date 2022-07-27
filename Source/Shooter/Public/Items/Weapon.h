@@ -35,6 +35,7 @@ public:
 	FORCEINLINE EAmmoType GetAmmoType() const { return AmmoType; }
 
 	FORCEINLINE FName GetReloadMontageSection() const { return ReloadMontageSection; }
+	FORCEINLINE void SetClipBoneName(const FName Name) { ClipBoneName = Name; }
 	FORCEINLINE FName GetClipBoneName() const { return ClipBoneName; }
 
 	bool ClipIsFull() const;

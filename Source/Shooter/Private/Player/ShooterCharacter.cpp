@@ -1113,17 +1113,11 @@ void AShooterCharacter::PickUpAmmo(AAmmo* Ammo)
 
 void AShooterCharacter::GrabClip()
 {
-	// TODO: Fix Clip issue 
-	if (EquippedWeapon == nullptr)
+	if (EquippedWeapon == nullptr || HandSceneComponent == nullptr)
 	{
 		return;
 	}
 	
-	if (HandSceneComponent == nullptr)
-	{
-		return;
-	}
-
 	const int32 ClipBoneIndex = EquippedWeapon->GetItemMesh()->GetBoneIndex(EquippedWeapon->GetClipBoneName());
 	ClipTransform = EquippedWeapon->GetItemMesh()->GetBoneTransform(ClipBoneIndex);
 
