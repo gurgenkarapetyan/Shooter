@@ -47,7 +47,6 @@ AShooterCharacter::AShooterCharacter() :
 	bFireButtonPressed(false),
 	bShouldFire(true),
 	// Automatic fire variables
-	AutomaticFireRate(0.1f),
 	ShootTimeDuration(0.05f),
 	bFiringBullet(false),
 	// Item trace variables
@@ -589,9 +588,10 @@ void AShooterCharacter::FireWeapon()
 
 void AShooterCharacter::PlayFireSoundCue() const
 {
+	USoundCue* FireSound = EquippedWeapon->GetFireSound();
 	if (FireSound)
 	{
-		UGameplayStatics::PlaySound2D(this, FireSound);;
+		UGameplayStatics::PlaySound2D(this, FireSound);
 	}
 }
 
@@ -606,6 +606,7 @@ void AShooterCharacter::CreateFireMuzzleFlashParticle()
 	if (BarrelSocket)
 	{
 		const FTransform SocketTransform = BarrelSocket->GetSocketTransform(EquippedWeapon->GetItemMesh());
+		UParticleSystem* MuzzleFlash = EquippedWeapon->GetMuzzleFlash();
 		if (MuzzleFlash)
 		{
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);;
@@ -702,8 +703,13 @@ void AShooterCharacter::FinishCrosshairBulletFire()
 
 void AShooterCharacter::StartFireTimer()
 {
+	if (EquippedWeapon == nullptr)
+	{
+		return;
+	}
+	
 	CombatState = ECombatState::ECS_FireTimerInProgress;
-	GetWorldTimerManager().SetTimer(AutoFireTimer, this, &AShooterCharacter::AutoFireReset, AutomaticFireRate);
+	GetWorldTimerManager().SetTimer(AutoFireTimer, this, &AShooterCharacter::AutoFireReset, EquippedWeapon->GetAutoFireRate());
 }
 
 void AShooterCharacter::AutoFireReset()
@@ -1178,7 +1184,6 @@ void AShooterCharacter::StartEquipSoundTimer()
 	bShouldPlayEquipSound = false;
 	GetWorldTimerManager().SetTimer(PickupSoundTimer,this, &AShooterCharacter::ResetEquipSoundTimer,EquipSoundResetTime);
 }
-
 
 void AShooterCharacter::ResetEquipSoundTimer()
 {

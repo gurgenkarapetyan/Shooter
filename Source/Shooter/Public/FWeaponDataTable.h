@@ -69,4 +69,13 @@ struct FWeaponDataTable : public FTableRowBase
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* CrosshairsTop;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AutoFireRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UParticleSystem* MuzzleFlash;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundCue* FireSound;
 };

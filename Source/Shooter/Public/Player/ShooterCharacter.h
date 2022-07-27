@@ -291,14 +291,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta=(AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 
-	/** Randomized gunshot sound cue. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta=(AllowPrivateAccess = "true"))
-	USoundCue* FireSound;
-
-	/** Flash spawned at barrel socket. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta=(AllowPrivateAccess = "true"))
-	UParticleSystem* MuzzleFlash;
-
 	/** Particles spawned upon bullet impact. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta=(AllowPrivateAccess = "true"))
     UParticleSystem* ImpactParticle;
@@ -394,9 +386,6 @@ private:
 	/** True when we can fire. False waiting for the timer. */
 	bool bShouldFire;
 	
-	/** Rate of automatic gun fire. */
-	float AutomaticFireRate;
-
 	/** Sets a timer between gunshots. */
 	FTimerHandle AutoFireTimer;
 	

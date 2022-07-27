@@ -39,6 +39,12 @@ public:
 	FORCEINLINE void SetClipBoneName(const FName Name) { ClipBoneName = Name; }
 	FORCEINLINE FName GetClipBoneName() const { return ClipBoneName; }
 
+	FORCEINLINE float GetAutoFireRate() const { return AutoFireRate; }
+	
+	FORCEINLINE UParticleSystem* GetMuzzleFlash() const { return MuzzleFlash; }
+
+	FORCEINLINE USoundCue* GetFireSound() const { return FireSound; }
+	
 	bool ClipIsFull() const;
 	
 protected:
@@ -102,4 +108,16 @@ private:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
 	UTexture2D* CrosshairsTop;
+
+	/** The speed at which automatic fire happens. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
+	float AutoFireRate;
+
+	/** Particle system spawned at the BarrelSocket */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* MuzzleFlash;
+
+	/** Sound played when the weapons fires. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
+	USoundCue* FireSound;
 };
