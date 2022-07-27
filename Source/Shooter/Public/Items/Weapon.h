@@ -86,4 +86,20 @@ private:
 	UDataTable* WeaponDataTable;
 
 	int32 PreviousMaterialIndex;
+
+	/** Textures for the weapon crosshairs. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
+	UTexture2D* CrosshairsMiddle;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
+	UTexture2D* CrosshairsLeft;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
+	UTexture2D* CrosshairsRight;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
+	UTexture2D* CrosshairsBottom;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
+	UTexture2D* CrosshairsTop;
 };

@@ -54,6 +54,7 @@ void AWeapon::OnConstruction(const FTransform& Transform)
 			AmmoType = WeaponDataRow->AmmoType;
 			Ammo = WeaponDataRow->WeaponAmmo;
 			MagazineCapacity = WeaponDataRow->MagazineCapacity;
+
 			SetPickUpSound(WeaponDataRow->PickupSound);
 			SetEquipSound(WeaponDataRow->EquipSound);
 			GetItemMesh()->SetSkeletalMesh(WeaponDataRow->ItemMesh);
@@ -65,9 +66,18 @@ void AWeapon::OnConstruction(const FTransform& Transform)
 			PreviousMaterialIndex = GetMaterialIndex();
 			GetItemMesh()->SetMaterial(PreviousMaterialIndex, nullptr);
 			SetMaterialIndex(WeaponDataRow->MaterialIndex);
+			
 			SetClipBoneName(WeaponDataRow->ClipBoneName);
+
 			SetReloadMontageSection(WeaponDataRow->ReloadMontageSection);
+
 			GetItemMesh()->SetAnimInstanceClass(WeaponDataRow->AnimBP);
+
+			CrosshairsMiddle = WeaponDataRow->CrosshairsMiddle;
+			CrosshairsLeft = WeaponDataRow->CrosshairsLeft;
+			CrosshairsRight = WeaponDataRow->CrosshairsRight;
+			CrosshairsBottom = WeaponDataRow->CrosshairsBottom;
+			CrosshairsTop = WeaponDataRow->CrosshairsTop;
 		}
 
 		if (GetMaterialInstance())
