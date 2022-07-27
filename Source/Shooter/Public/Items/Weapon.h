@@ -49,6 +49,8 @@ public:
 	
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	virtual void BeginPlay() override;
 	
 	void StopFalling();
 	
@@ -120,4 +122,8 @@ private:
 	/** Sound played when the weapons fires. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
 	USoundCue* FireSound;
+
+	/** Name of the bone to hide on the weapon mesh. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DataTable", meta = (AllowPrivateAccess = "true"))
+	FName BoneToHide;
 };

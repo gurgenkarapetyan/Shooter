@@ -799,6 +799,8 @@ void AShooterCharacter::ReloadButtonPressed()
 
 void AShooterCharacter::ReloadWeapon()
 {
+	// TODO: Fix for AR Weapon
+	// TODO: Fix SMG, when 0 bullet is left
 	if (CombatState != ECombatState::ECS_Unoccupied)
 	{
 		return;

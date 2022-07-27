@@ -78,4 +78,7 @@ struct FWeaponDataTable : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundCue* FireSound;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName BoneToHide;
 };
