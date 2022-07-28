@@ -723,7 +723,7 @@ void AShooterCharacter::AutoFireReset()
 	CombatState = ECombatState::ECS_Unoccupied;
 	if (WeaponHasAmmo())
 	{
-		if (bFireButtonPressed)
+		if (bFireButtonPressed && EquippedWeapon->GetAutomatic())
 		{
 			FireWeapon();
 		}
@@ -737,7 +737,7 @@ void AShooterCharacter::AutoFireReset()
 void AShooterCharacter::AimingButtonPressed()
 {
 	bAimingButtonPressed = true;
-	if (CombatState != ECombatState::ECS_Reloading)
+	if (CombatState != ECombatState::ECS_Reloading && CombatState != ECombatState::ECS_Equipping)
 	{
 		Aim();
 	}
@@ -895,7 +895,11 @@ void AShooterCharacter::FinishReloading()
 
 void AShooterCharacter::FinishEquipping()
 {
-	CombatState = ECombatState::ECS_Unoccupied;	
+	CombatState = ECombatState::ECS_Unoccupied;
+	if (bAimingButtonPressed)
+	{
+		Aim();
+	}
 }
 
 void AShooterCharacter::CrouchButtonPressed()
@@ -985,6 +989,11 @@ void AShooterCharacter::ExchangeInventoryItems(const int32 CurrentItemIndex, con
 		return; 
 	}
 
+	if (bAiming)
+	{
+		StopAiming();
+	}
+		
 	const auto OldEquippedWeapon = EquippedWeapon;
 	const auto NewWeapon = Cast<AWeapon>(Inventory[NewItemIndex]);
 	EquipWeapon(NewWeapon);

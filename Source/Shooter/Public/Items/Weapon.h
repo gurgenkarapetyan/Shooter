@@ -47,6 +47,8 @@ public:
 
 	FORCEINLINE USoundCue* GetFireSound() const { return FireSound; }
 	
+	FORCEINLINE bool GetAutomatic() const { return bAutomatic; }
+	
 	bool ClipIsFull() const;
 	
 protected:
@@ -162,4 +164,8 @@ private:
 	/** True when moving pistol slide. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Pistol", meta = (AllowPrivateAccess = "true"))
 	bool bMovingSlide;
+
+	/** True for auto gun fire. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pistol", meta = (AllowPrivateAccess = "true"))
+	bool bAutomatic;
 };
