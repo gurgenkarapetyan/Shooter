@@ -281,6 +281,9 @@ private:
 	int32 GetEmptyInventorySlot();
 
 	void HighlightInventorySlot();
+
+	UFUNCTION(BlueprintCallable)
+	EPhysicalSurface GetSurfaceType();
 	
 private:
 	/** Camera boom positioning the camera behind the character. */
