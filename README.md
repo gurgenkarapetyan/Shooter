@@ -6,3 +6,4 @@
 3. Weapon slot crash issue
 4. Crouch left mouse move issue
 5. Issue with weapons issues on aiming
+6. Fix Turn Hips while Running Backwards(12.17)
