@@ -211,17 +211,14 @@ private:
 	/** Playing fire sound cue when character starts firing. */
 	void PlayFireSoundCue() const;
 
-	/** Create particle effect when character starts firing. */
-	void CreateFireMuzzleFlashParticle();
+	/** FireWeapon Functions. */
+	void SendBullet();
+	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FHitResult& OutHitResult);
+	bool TraceUnderCrosshairs(FHitResult& OutHitResult, FVector& OutHitLocation);
+
 	
 	/** Play fire weapon animation montage when character starts firing. */
-	void PlayFireAnimMontage() const;
-
-	/**
-	 * Create LineTrace when character starts firing.
-	 * @param Barrel is Weapon's BarrelSocket Transform information.
-	 */
-	void SetBulletLineTrace(const FTransform Barrel);
+	void PlayFireAnimMontage();
 
 	/**
 	* Returns the size of the current viewport.

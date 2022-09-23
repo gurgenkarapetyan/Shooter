@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Shooter/Public/Player/ShooterCharacter.h"
+
+#include "Enemy.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -10,6 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Sound/SoundCue.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Interfaces/BulletHitInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
@@ -579,9 +582,8 @@ void AShooterCharacter::FireWeapon()
 	{
 	
 		PlayFireSoundCue();
-		CreateFireMuzzleFlashParticle();
+		SendBullet();
 		PlayFireAnimMontage();
-		StartCrosshairBulletFire();
 		EquippedWeapon->DecrementAmmo();
 
 		StartFireTimer();
@@ -603,13 +605,8 @@ void AShooterCharacter::PlayFireSoundCue() const
 	}
 }
 
-void AShooterCharacter::CreateFireMuzzleFlashParticle()
+void AShooterCharacter::SendBullet()
 {
-	if (EquippedWeapon == nullptr)
-	{
-		return;
-	}
-	
 	const USkeletalMeshSocket* BarrelSocket = EquippedWeapon->GetItemMesh()->GetSocketByName("BarrelSocket");
 	if (BarrelSocket)
 	{
@@ -620,54 +617,94 @@ void AShooterCharacter::CreateFireMuzzleFlashParticle()
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);;
 		}
 
-		SetBulletLineTrace(SocketTransform);
+		FHitResult BeamHitResult;
+		const bool bBeamEnd = GetBeamEndLocation(SocketTransform.GetLocation(), BeamHitResult);
+		if (bBeamEnd)
+		{
+			// Does hit Actor implement BulletHitInterface?
+			if (BeamHitResult.Actor.IsValid())
+			{
+				IBulletHitInterface* const BulletHitInterface = Cast<IBulletHitInterface>(BeamHitResult.Actor.Get());
+				if (BulletHitInterface)
+				{
+					BulletHitInterface->BulletHit_Implementation(BeamHitResult);
+				}
+
+				const AEnemy* const HitEnemy = Cast<AEnemy>(BeamHitResult.Actor.Get());
+				if (HitEnemy)
+				{
+					UGameplayStatics::ApplyDamage(BeamHitResult.Actor.Get(), EquippedWeapon->GetDamage(), GetController(), this, UDamageType::StaticClass());
+				}
+			}
+			else
+			{
+				// Spawn default particles
+				if (ImpactParticle)
+				{
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, BeamHitResult.Location);
+				}
+			}
+
+			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticles, SocketTransform);
+			if (Beam)
+			{
+				Beam->SetVectorParameter(FName("Target"), BeamHitResult.Location);
+			}
+		}
 	}
 }
 
-void AShooterCharacter::SetBulletLineTrace(const FTransform Barrel)
+bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, FHitResult& OutHitResult)
 {
+	FVector OutBeamLocation;
+	// Check for crosshair trace hit
+	FHitResult CrosshairHitResult;
+	bool bCrosshairHit = TraceUnderCrosshairs(CrosshairHitResult, OutBeamLocation);
+
+	if (bCrosshairHit)
+	{
+		// Tentative beam location - still need to trace from gun
+		OutBeamLocation = CrosshairHitResult.Location;
+	}
+	
+	// Perform a second trace, this time from the gun barrel
+	const FVector WeaponTraceStart{ MuzzleSocketLocation };
+	const FVector StartToEnd{ OutBeamLocation - WeaponTraceStart };
+	const FVector WeaponTraceEnd{ MuzzleSocketLocation + StartToEnd * 1.25f };
+	GetWorld()->LineTraceSingleByChannel(OutHitResult, WeaponTraceStart, WeaponTraceEnd, ECollisionChannel::ECC_Visibility);
+
+	// object between barrel and BeamEndPoint?
+	if (!OutHitResult.bBlockingHit) 
+	{
+		OutHitResult.Location = OutBeamLocation;
+		return false;
+	}
+
+	return true;
+}
+
+bool AShooterCharacter::TraceUnderCrosshairs(FHitResult& OutHitResult, FVector& OutHitLocation)
+{
+	// Get world position and direction of crosshairs
 	FVector CrosshairWorldPosition;
 	FVector CrosshairWorldDirection;
-	bool bScreenToWorld = GetScreenSpaceLocationOfCrosshairs(CrosshairWorldPosition, CrosshairWorldDirection);
+	const bool bScreenToWorld = GetScreenSpaceLocationOfCrosshairs(CrosshairWorldPosition, CrosshairWorldDirection);
 	if (bScreenToWorld)
 	{
-		FHitResult ScreenTraceHit;
-		const FVector Start = CrosshairWorldPosition;
-		const FVector End = CrosshairWorldPosition + CrosshairWorldDirection * 50000.f;
+		// Trace from Crosshair world location outward
+		const FVector Start{ CrosshairWorldPosition };
+		const FVector End{ Start + CrosshairWorldDirection * 50'000.f };
+		OutHitLocation = End;
+		GetWorld()->LineTraceSingleByChannel(OutHitResult, Start, End, ECollisionChannel::ECC_Visibility);
 
-		FVector BeamEndPoint = End;
-		
-		GetWorld()->LineTraceSingleByChannel(ScreenTraceHit, Start, End, ECC_Visibility);
-		if (ScreenTraceHit.bBlockingHit)
+		if (OutHitResult.bBlockingHit)
 		{
-			BeamEndPoint = ScreenTraceHit.Location;
-			if (ImpactParticle)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, BeamEndPoint);
-			}
-		}
-
-		// perform second trace, this time from the gun barrel
-		FHitResult WeaponTraceHit;
-		const FVector WeaponTraceStart = Barrel.GetLocation();
-		const FVector WeaponTraceEnd = BeamEndPoint;
-		GetWorld()->LineTraceSingleByChannel(WeaponTraceHit, WeaponTraceStart, WeaponTraceEnd, ECC_Visibility);
-
-		// object between barrel and BeamEndPoint
-		if (WeaponTraceHit.bBlockingHit)
-		{
-			BeamEndPoint = WeaponTraceHit.Location;
-		}
-		
-		if (BeamParticles)
-		{
-			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticles, Barrel);
-			if (Beam)
-			{
-				Beam->SetVectorParameter(FName("Target"), BeamEndPoint);
-			}
+			OutHitLocation = OutHitResult.Location;
+			return true;
 		}
 	}
+
+	return false;
 }
 
 bool AShooterCharacter::GetScreenSpaceLocationOfCrosshairs(FVector& CrosshairWorldPosition, FVector& CrosshairWorldDirection)
@@ -688,7 +725,7 @@ void AShooterCharacter::GetCurrentSizeOfViewport(FVector2D& ViewportSize)
 	}
 }
 
-void AShooterCharacter::PlayFireAnimMontage() const
+void AShooterCharacter::PlayFireAnimMontage()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && HipFireMontage)
@@ -696,6 +733,8 @@ void AShooterCharacter::PlayFireAnimMontage() const
 		AnimInstance->Montage_Play(HipFireMontage);
 		AnimInstance->Montage_JumpToSection(FName("StartFire"));
 	}
+
+	StartCrosshairBulletFire();
 }
 
 void AShooterCharacter::StartCrosshairBulletFire()
