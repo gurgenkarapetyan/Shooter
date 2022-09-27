@@ -2,7 +2,7 @@
 
 #include "Shooter/Public/Player/ShooterCharacter.h"
 
-#include "Enemy.h"
+#include "Shooter/Public/AI/Enemy.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -630,19 +630,24 @@ void AShooterCharacter::SendBullet()
 					BulletHitInterface->BulletHit_Implementation(BeamHitResult);
 				}
 
-				const AEnemy* const HitEnemy = Cast<AEnemy>(BeamHitResult.Actor.Get());
+				AEnemy* const HitEnemy = Cast<AEnemy>(BeamHitResult.Actor.Get());
 				if (HitEnemy)
 				{
+					int32 Damage;
 					if (BeamHitResult.BoneName.ToString() == HitEnemy->GetHeadBone())
 					{
 						// Head shot
-						UGameplayStatics::ApplyDamage(BeamHitResult.Actor.Get(), EquippedWeapon->GetHeadShotDamage(), GetController(), this, UDamageType::StaticClass());
+						Damage = EquippedWeapon->GetHeadShotDamage();
+						UGameplayStatics::ApplyDamage(BeamHitResult.Actor.Get(), Damage, GetController(), this, UDamageType::StaticClass());
 					}
 					else
 					{
 						// Body shot
-						UGameplayStatics::ApplyDamage(BeamHitResult.Actor.Get(), EquippedWeapon->GetDamage(), GetController(), this, UDamageType::StaticClass());
+						Damage = EquippedWeapon->GetDamage();
+						UGameplayStatics::ApplyDamage(BeamHitResult.Actor.Get(), Damage, GetController(), this, UDamageType::StaticClass());
 					}
+
+					HitEnemy->ShowHitNumber(Damage, BeamHitResult.Location);
 				}
 			}
 			else
