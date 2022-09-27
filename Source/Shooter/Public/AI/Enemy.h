@@ -8,6 +8,7 @@
 #include "Enemy.generated.h"
 
 class USoundCue;
+class UBehaviorTree;
 
 UCLASS()
 class SHOOTER_API AEnemy : public ACharacter, public IBulletHitInterface
@@ -26,6 +27,8 @@ public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	FORCEINLINE FString GetHeadBone() const { return HeadBone; }
+
+	FORCEINLINE UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
 
 	/** Display amount of damage applied to. */
 	UFUNCTION(BlueprintImplementableEvent)
@@ -120,4 +123,8 @@ private:
 	/** Time before a HitNumber is removed from the screen. */
 	UPROPERTY(EditAnywhere, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float HitNumberDestroyTime;
+
+	/** Behavior tree for the AI Character. */
+	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
+	UBehaviorTree* BehaviorTree;
 };
