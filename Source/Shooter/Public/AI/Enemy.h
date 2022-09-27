@@ -21,9 +21,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	virtual void BulletHit_Implementation(FHitResult HitResult) override;
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
@@ -32,7 +29,7 @@ public:
 
 	/** Display amount of damage applied to. */
 	UFUNCTION(BlueprintImplementableEvent)
-	void ShowHitNumber(const int32 Damage, const FVector HitLocation);
+	void ShowHitNumber(const int32 Damage, const FVector HitLocation, bool bHeadShot);
 	
 protected:
 	// Called when the game starts or when spawned
@@ -71,7 +68,6 @@ protected:
 	 */
 	UFUNCTION()
 	void DestroyHitNumber(UUserWidget* HitNumber);
-
 	
 	/** Update HitNumbers screen space location according to the hit location of the bullet. */
 	void UpdateHitNumbers() const;

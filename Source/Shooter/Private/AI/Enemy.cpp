@@ -58,13 +58,6 @@ void AEnemy::UpdateHitNumbers() const
 	}
 }
 
-// Called to bind functionality to input
-void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-
 void AEnemy::BulletHit_Implementation(FHitResult HitResult)
 {
 	IBulletHitInterface::BulletHit_Implementation(HitResult);
