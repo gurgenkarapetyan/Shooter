@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Shooter/Public/Animations/ShooterAnimInstance.h"
+#include "Shooter/Public/Player/ShooterAnimInstance.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Items/Weapon.h"
