@@ -16,8 +16,6 @@ class AShooterCharacter;
 class USoundCue;
 class UCurveVector;
 
-
-
 UCLASS()
 class SHOOTER_API AItem : public AActor
 {

@@ -9,6 +9,8 @@
 
 class USoundCue;
 class UBehaviorTree;
+class AEnemyAIController;
+class USphereComponent;
 
 UCLASS()
 class SHOOTER_API AEnemy : public ACharacter, public IBulletHitInterface
@@ -38,6 +40,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	/** Called when something overlaps with the agro shpere. */
+	void AgroSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	
 	/** Display health bar once get shot. */
 	UFUNCTION(BlueprintNativeEvent)
 	void ShowHeathBar();
@@ -74,6 +80,9 @@ protected:
 	
 	/** Update HitNumbers screen space location according to the hit location of the bullet. */
 	void UpdateHitNumbers() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetStunned(const bool Stunned);
 	
 private:
 	/** Particles to spawn when hit by bullet. */
@@ -124,7 +133,32 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float HitNumberDestroyTime;
 
+	/** True when playing the get hit animation. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	bool bStunned;
+
+	/** Chance of being stunned.
+	 *	0: no stun chance
+	 *  1: 100% stun chance
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float StunChance;
+	
+	/** Overlap sphere for when the enemy becomes hostile. */
+	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true", MakeEditWidget = "true"))
+	USphereComponent* AgrosSphere;
+	
 	/** Behavior tree for the AI Character. */
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
 	UBehaviorTree* BehaviorTree;
+	
+	/** Point for the enemy to move to. */
+	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true", MakeEditWidget = "true"))
+	FVector PatrolPoint;
+
+	/** Second Point for the enemy to move to. */
+	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true", MakeEditWidget = "true"))
+	FVector PatrolPoint2;
+	
+	AEnemyAIController* EnemyAIController;
 };
