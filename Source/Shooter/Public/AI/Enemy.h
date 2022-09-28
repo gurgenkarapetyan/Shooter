@@ -40,9 +40,22 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	/** Called when something overlaps with the agro sphere. */
 	UFUNCTION()
-	/** Called when something overlaps with the agro shpere. */
-	void AgroSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	void AgroSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	/** Called when something overlaps with the combat sphere and is in attack range. */
+	UFUNCTION()
+	void CombatRangeSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	/** Called when out of overlapping with combat sphere and not anymore in attack range. */
+	UFUNCTION()
+	void CombatRangeSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	/** Toggle InAttackRange and Blackboard values for checking attack.
+	 *	@param InAttackRange
+	 */
+	void SetInAttackRangeProperties(const bool InAttackRange);
 	
 	/** Display health bar once get shot. */
 	UFUNCTION(BlueprintNativeEvent)
@@ -83,6 +96,17 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void SetStunned(const bool Stunned);
+
+	/**
+	* Play montage section when enemy attacks.
+	* @param Section name to play montage.
+	* @param PlayRate which rate should montage play.
+	*/
+	UFUNCTION(BlueprintCallable)
+	void PlayAttackMontage(const FName Section, const float PlayRate = 1.f);
+
+	UFUNCTION(BlueprintPure)
+	FName GetAttackSectionName() const;
 	
 private:
 	/** Particles to spawn when hit by bullet. */
@@ -143,9 +167,27 @@ private:
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float StunChance;
+
+	/** True when in attack range time to attack. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	bool bInAttackRange;
+
+	/** Montage containing different attacks. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* AttackMontage;
+
+	/** The four attack montage section names. */
+	FName AttackLFast;
+	FName AttackRFast;
+	FName AttackL;
+	FName AttackR;
+	
+	/** Overlap sphere for attack range. */
+	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
+	USphereComponent* CombatRangeSphere;
 	
 	/** Overlap sphere for when the enemy becomes hostile. */
-	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true", MakeEditWidget = "true"))
+	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
 	USphereComponent* AgrosSphere;
 	
 	/** Behavior tree for the AI Character. */

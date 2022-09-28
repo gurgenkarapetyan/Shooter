@@ -7,6 +7,7 @@
 #include "AI/EnemyAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -23,13 +24,24 @@ AEnemy::AEnemy()
 	, HitNumberDestroyTime(1.5f)
 	, bStunned(false)
 	, StunChance(0.5f)
+	, AttackLFast(TEXT("AttackLFast"))
+	, AttackRFast(TEXT("AttackRFast"))
+	, AttackL(TEXT("AttackL"))
+	, AttackR(TEXT("AttackR"))
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Vehicle, ECollisionResponse::ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	
+	// Create the Agro Sphere 
 	AgrosSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Agro Sphere"));
 	AgrosSphere->SetupAttachment(GetRootComponent());
+	
+	// Create the Combat Sphere
+ 	CombatRangeSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Combat Range Sphere"));
+	CombatRangeSphere->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
@@ -37,7 +49,9 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	AgrosSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::AgroSphereOverlap);
+	AgrosSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::AgroSphereBeginOverlap);
+	CombatRangeSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::CombatRangeSphereBeginOverlap);
+	CombatRangeSphere->OnComponentEndOverlap.AddDynamic(this, &AEnemy::CombatRangeSphereEndOverlap);
 	
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
@@ -57,7 +71,7 @@ void AEnemy::BeginPlay()
 	}
 }
 
-void AEnemy::AgroSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AEnemy::AgroSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor == nullptr)
 	{
@@ -68,6 +82,25 @@ void AEnemy::AgroSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	if (ShooterCharacter)
 	{
 		EnemyAIController->GetBlackBoardComponent()->SetValueAsObject(TEXT("Target"), ShooterCharacter);
+	}
+}
+
+void AEnemy::CombatRangeSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	SetInAttackRangeProperties(true);
+}
+
+void AEnemy::CombatRangeSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	SetInAttackRangeProperties(false);
+}
+
+void AEnemy::SetInAttackRangeProperties(const bool InAttackRange)
+{
+	bInAttackRange = InAttackRange;
+	if (EnemyAIController)
+	{
+		EnemyAIController->GetBlackBoardComponent()->SetValueAsBool(TEXT("InAttackRange"), InAttackRange);
 	}
 }
 
@@ -165,6 +198,40 @@ void AEnemy::DestroyHitNumber(UUserWidget* HitNumber)
 {
 	HitNumbers.Remove(HitNumber);
 	HitNumber->RemoveFromParent();
+}
+
+void AEnemy::PlayAttackMontage(const FName Section, const float PlayRate)
+{
+	UAnimInstance* const AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && AttackMontage)
+	{
+		AnimInstance->Montage_Play(AttackMontage, PlayRate);
+		AnimInstance->Montage_JumpToSection(Section, AttackMontage);
+	}
+}
+
+FName AEnemy::GetAttackSectionName() const
+{
+	FName SectionName; 
+
+	const int32 Section = FMath::RandRange(1, 4);
+	switch (Section)
+	{
+	case 1:
+		SectionName = AttackLFast;
+	break;
+	case 2:
+		SectionName = AttackRFast;
+	break;
+	case 3:
+		SectionName = AttackL;
+	break;
+	case 4:
+		SectionName = AttackR;
+	break;
+	}
+
+	return SectionName;
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
