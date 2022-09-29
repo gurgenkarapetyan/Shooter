@@ -63,6 +63,8 @@ AShooterCharacter::AShooterCharacter() :
 	StartingARAmmo(120),
 	// Combat variables
 	CombatState(ECombatState::ECS_Unoccupied),
+	Health(100.f),
+	MaxHealth(100.f),
 	bCrouching(false),
 	BaseMovementSpeed(650.f),
 	CrouchMovementSpeed(300.f),
@@ -1276,4 +1278,20 @@ EPhysicalSurface AShooterCharacter::GetSurfaceType()
 	// TEnumAsByte<EPhysicalSurface> HitSurface = HitResult.PhysMaterial->SurfaceType;\
 	
 	return UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
+}
+
+float AShooterCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (Health - DamageAmount <= 0.f)
+	{
+		Health = 0.f;
+	}
+	else
+	{
+		Health -= DamageAmount;
+	}
+
+	return 0.f;
 }

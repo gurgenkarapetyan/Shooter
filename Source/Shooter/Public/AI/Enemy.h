@@ -11,6 +11,7 @@ class USoundCue;
 class UBehaviorTree;
 class AEnemyAIController;
 class USphereComponent;
+class UBoxComponent;
 
 UCLASS()
 class SHOOTER_API AEnemy : public ACharacter, public IBulletHitInterface
@@ -52,6 +53,29 @@ protected:
 	UFUNCTION()
 	void CombatRangeSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	/** Called when left weapon overlap with character during attack. */
+	UFUNCTION()
+	void OnLeftWeaponBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	/** Called when right weapon overlap with character during attack. */
+	UFUNCTION()
+	void OnRightWeaponBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	/** Apply damage to the actor that enemy attacked.
+	 *	@param ActorToAttack actor that will receive an attack.
+	 */
+	void DoDamage(AActor* const ActorToAttack);
+	
+	/** Activate/Deactivate collision for weapon box. */
+	UFUNCTION(BlueprintCallable)
+	void ActivateLeftWeapon();
+	UFUNCTION(BlueprintCallable)
+	void DeactivateLeftWeapon();
+	UFUNCTION(BlueprintCallable)
+	void ActivateRightWeapon();
+	UFUNCTION(BlueprintCallable)
+	void DeactivateRightWeapon();
+	
 	/** Toggle InAttackRange and Blackboard values for checking attack.
 	 *	@param InAttackRange
 	 */
@@ -181,6 +205,18 @@ private:
 	FName AttackRFast;
 	FName AttackL;
 	FName AttackR;
+
+	/** Collision volume for left weapon. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* LeftWeaponCollision;
+	
+	/** Collision volume for right weapon. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* RightWeaponCollision;
+
+	/** Base damage for the enemy. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float BaseDamage;
 	
 	/** Overlap sphere for attack range. */
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
