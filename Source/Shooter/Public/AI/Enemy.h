@@ -12,6 +12,7 @@ class UBehaviorTree;
 class AEnemyAIController;
 class USphereComponent;
 class UBoxComponent;
+class AShooterCharacter;
 
 UCLASS()
 class SHOOTER_API AEnemy : public ACharacter, public IBulletHitInterface
@@ -62,9 +63,16 @@ protected:
 	void OnRightWeaponBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
 	/** Apply damage to the actor that enemy attacked.
-	 *	@param ActorToAttack actor that will receive an attack.
+	 *	@param ShooterCharacter character that will receive an attack.
 	 */
-	void DoDamage(AActor* const ActorToAttack);
+	void DoDamage(AShooterCharacter* const ShooterCharacter);
+
+
+	/** Apply damage to the actor that enemy attacked.
+	 *	@param ShooterCharacter character that will receive an attack and spawn a blood effect.
+	 *	@param SocketName weapon socket name 
+	 */
+	void SpawnBlood(AShooterCharacter* const ShooterCharacter, const FName SocketName) const;
 	
 	/** Activate/Deactivate collision for weapon box. */
 	UFUNCTION(BlueprintCallable)
@@ -206,6 +214,12 @@ private:
 	FName AttackL;
 	FName AttackR;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	FName LeftWeaponSocket;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	FName RightWeaponSocket;
+	
 	/** Collision volume for left weapon. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* LeftWeaponCollision;

@@ -64,6 +64,10 @@ public:
 	FORCEINLINE ECombatState GetCombatState() const { return CombatState; }
 
 	FORCEINLINE AWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
+
+	FORCEINLINE USoundCue* GetMeleeImpactSound() const { return MeleeImpactSound; }
+
+	FORCEINLINE UParticleSystem* GetBloodParticles() const { return BloodParticles; }
 	
 	FInterpLocation GetInterpolationLocation(const int32 Index);
 
@@ -466,6 +470,14 @@ private:
 	/** Maximum health. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float MaxHealth;
+
+	/** Sound made when character gets hit by a melee attack. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	USoundCue* MeleeImpactSound; 
+
+	/** Blood splatter particles for melee hit. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* BloodParticles;
 	
 	/** True when crouching. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
@@ -549,11 +561,11 @@ private:
 	bool bShouldPlayEquipSound;
 
 	/** Time to wait before we can play another Pickup Sound */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))
 	float PickupSoundResetTime;
 
 	/** Time to wait before we can play another Equip Sound */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))
 	float EquipSoundResetTime;
 
 	FTimerHandle PickupSoundTimer;

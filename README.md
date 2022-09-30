@@ -7,3 +7,4 @@
 4. Crouch left mouse move issue
 5. Issue with weapons issues on aiming
 6. Fix Turn Hips while Running Backwards(12.17)
+7. Find blood particle for shooter character

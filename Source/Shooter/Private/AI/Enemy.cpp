@@ -10,6 +10,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/ShooterCharacter.h"
@@ -29,6 +30,8 @@ AEnemy::AEnemy() :
 	AttackRFast(TEXT("AttackRFast")),
 	AttackL(TEXT("AttackL")),
 	AttackR(TEXT("AttackR")),
+	LeftWeaponSocket(TEXT("FX_Trail_L_01")),
+	RightWeaponSocket(TEXT("FX_Trail_R_01")),
 	BaseDamage(20.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -129,26 +132,54 @@ void AEnemy::SetInAttackRangeProperties(const bool InAttackRange)
 
 void AEnemy::OnLeftWeaponBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	DoDamage(OtherActor);
+	AShooterCharacter* const ShooterCharacter = Cast<AShooterCharacter>(OtherActor);
+	if (ShooterCharacter)
+	{
+		DoDamage(ShooterCharacter);
+		SpawnBlood(ShooterCharacter, LeftWeaponSocket);
+	}
 }
 
 void AEnemy::OnRightWeaponBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	DoDamage(OtherActor);
+	AShooterCharacter* const ShooterCharacter = Cast<AShooterCharacter>(OtherActor);
+	if (ShooterCharacter)
+	{
+		DoDamage(ShooterCharacter);
+		SpawnBlood(ShooterCharacter, RightWeaponSocket);
+	}
 }
 
-void AEnemy::DoDamage(AActor* const ActorToAttack)
+void AEnemy::DoDamage(AShooterCharacter* const ShooterCharacter)
 {
-	if (ActorToAttack == nullptr)
+	if (ShooterCharacter == nullptr)
 	{
 		return;
 	}
 	
-	AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(ActorToAttack);
-	if (ShooterCharacter)
+	UGameplayStatics::ApplyDamage(ShooterCharacter, BaseDamage, EnemyAIController, this, UDamageType::StaticClass());
+
+	if (ShooterCharacter->GetMeleeImpactSound())
 	{
-		UGameplayStatics::ApplyDamage(ShooterCharacter, BaseDamage, EnemyAIController, this, UDamageType::StaticClass());
+		UGameplayStatics::PlaySoundAtLocation(this, ShooterCharacter->GetMeleeImpactSound(), GetActorLocation());	
 	}
+}
+
+void AEnemy::SpawnBlood(AShooterCharacter* const ShooterCharacter, const FName SocketName) const
+{
+	if (ShooterCharacter->GetBloodParticles() == nullptr)
+	{
+		return;
+	}
+	
+	const USkeletalMeshSocket* const TipSocket = GetMesh()->GetSocketByName(SocketName);
+	if (TipSocket == nullptr)
+	{
+		return;
+	}
+	
+	const FTransform SocketTransform = TipSocket->GetSocketTransform(GetMesh());
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ShooterCharacter->GetBloodParticles(), SocketTransform);
 }
 
 void AEnemy::ActivateLeftWeapon()
