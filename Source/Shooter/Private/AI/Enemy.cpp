@@ -137,6 +137,7 @@ void AEnemy::OnLeftWeaponBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	{
 		DoDamage(ShooterCharacter);
 		SpawnBlood(ShooterCharacter, LeftWeaponSocket);
+		StunCharacter(ShooterCharacter);
 	}
 }
 
@@ -147,6 +148,7 @@ void AEnemy::OnRightWeaponBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	{
 		DoDamage(ShooterCharacter);
 		SpawnBlood(ShooterCharacter, RightWeaponSocket);
+		StunCharacter(ShooterCharacter);
 	}
 }
 
@@ -165,7 +167,7 @@ void AEnemy::DoDamage(AShooterCharacter* const ShooterCharacter)
 	}
 }
 
-void AEnemy::SpawnBlood(AShooterCharacter* const ShooterCharacter, const FName SocketName) const
+void AEnemy::SpawnBlood(const AShooterCharacter* const ShooterCharacter, const FName SocketName) const
 {
 	if (ShooterCharacter->GetBloodParticles() == nullptr)
 	{
@@ -180,6 +182,18 @@ void AEnemy::SpawnBlood(AShooterCharacter* const ShooterCharacter, const FName S
 	
 	const FTransform SocketTransform = TipSocket->GetSocketTransform(GetMesh());
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ShooterCharacter->GetBloodParticles(), SocketTransform);
+}
+
+void AEnemy::StunCharacter(AShooterCharacter* const ShooterCharacter)
+{
+	if (ShooterCharacter)
+	{
+		const float Stun = FMath::FRandRange(0.f, 1.f);
+		if (Stun <= ShooterCharacter->GetStunChance())
+		{
+			ShooterCharacter->Stun();
+		}
+	}
 }
 
 void AEnemy::ActivateLeftWeapon()

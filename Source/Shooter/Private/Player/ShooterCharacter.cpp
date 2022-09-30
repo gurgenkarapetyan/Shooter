@@ -65,6 +65,7 @@ AShooterCharacter::AShooterCharacter() :
 	CombatState(ECombatState::ECS_Unoccupied),
 	Health(100.f),
 	MaxHealth(100.f),
+	StunChance(0.25f),
 	bCrouching(false),
 	BaseMovementSpeed(650.f),
 	CrouchMovementSpeed(300.f),
@@ -778,6 +779,11 @@ void AShooterCharacter::StartFireTimer()
 
 void AShooterCharacter::AutoFireReset()
 {
+	if (CombatState == ECombatState::ECS_Stunned)
+	{
+		return;	
+	}
+	
 	CombatState = ECombatState::ECS_Unoccupied;
 	if (WeaponHasAmmo())
 	{
@@ -795,7 +801,7 @@ void AShooterCharacter::AutoFireReset()
 void AShooterCharacter::AimingButtonPressed()
 {
 	bAimingButtonPressed = true;
-	if (CombatState != ECombatState::ECS_Reloading && CombatState != ECombatState::ECS_Equipping)
+	if (CombatState != ECombatState::ECS_Reloading && CombatState != ECombatState::ECS_Equipping && CombatState != ECombatState::ECS_Stunned)
 	{
 		Aim();
 	}
@@ -912,6 +918,11 @@ bool AShooterCharacter::CarryingAmmo()
 
 void AShooterCharacter::FinishReloading()
 {
+	if (CombatState == ECombatState::ECS_Stunned)
+	{
+		return; 
+	}
+
 	// Update the Combat State
 	CombatState = ECombatState::ECS_Unoccupied;
 
@@ -953,6 +964,11 @@ void AShooterCharacter::FinishReloading()
 
 void AShooterCharacter::FinishEquipping()
 {
+	if (CombatState == ECombatState::ECS_Stunned)
+	{
+		return;
+	}
+	
 	CombatState = ECombatState::ECS_Unoccupied;
 	if (bAimingButtonPressed)
 	{
@@ -1278,6 +1294,28 @@ EPhysicalSurface AShooterCharacter::GetSurfaceType()
 	// TEnumAsByte<EPhysicalSurface> HitSurface = HitResult.PhysMaterial->SurfaceType;\
 	
 	return UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
+}
+
+void AShooterCharacter::Stun()
+{
+	CombatState = ECombatState::ECS_Stunned;
+	if (HitReactMontage)
+	{
+		UAnimInstance* const AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(HitReactMontage);
+		}
+	}
+}
+
+void AShooterCharacter::EndStun()
+{
+	CombatState = ECombatState::ECS_Unoccupied;
+	if (bAimingButtonPressed)
+	{
+		Aim();
+	}
 }
 
 float AShooterCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

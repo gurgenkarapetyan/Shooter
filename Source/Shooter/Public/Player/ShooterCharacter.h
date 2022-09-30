@@ -68,6 +68,8 @@ public:
 	FORCEINLINE USoundCue* GetMeleeImpactSound() const { return MeleeImpactSound; }
 
 	FORCEINLINE UParticleSystem* GetBloodParticles() const { return BloodParticles; }
+
+	FORCEINLINE float GetStunChance() const { return StunChance; }
 	
 	FInterpLocation GetInterpolationLocation(const int32 Index);
 
@@ -88,6 +90,8 @@ public:
 	void StartEquipSoundTimer();
 
 	void UnHighlightInventorySlot();
+	
+	void Stun();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -287,6 +291,9 @@ private:
 
 	UFUNCTION(BlueprintCallable)
 	EPhysicalSurface GetSurfaceType();
+
+	UFUNCTION(BlueprintCallable)
+	void EndStun();
 	
 private:
 	/** Camera boom positioning the camera behind the character. */
@@ -478,6 +485,14 @@ private:
 	/** Blood splatter particles for melee hit. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* BloodParticles;
+
+	/** Hit react anim montage when character is stunned. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* HitReactMontage;
+
+	/** Chance of being stunned when hit by enemy. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float StunChance;
 	
 	/** True when crouching. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))

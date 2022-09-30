@@ -72,7 +72,12 @@ protected:
 	 *	@param ShooterCharacter character that will receive an attack and spawn a blood effect.
 	 *	@param SocketName weapon socket name 
 	 */
-	void SpawnBlood(AShooterCharacter* const ShooterCharacter, const FName SocketName) const;
+	void SpawnBlood(const AShooterCharacter* const ShooterCharacter, const FName SocketName) const;
+
+	/** Attempt to stun character
+	 * @param ShooterCharacter character that enemy will try to stun.
+	 */
+	void StunCharacter(AShooterCharacter* const ShooterCharacter);
 	
 	/** Activate/Deactivate collision for weapon box. */
 	UFUNCTION(BlueprintCallable)
