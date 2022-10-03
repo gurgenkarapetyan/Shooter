@@ -2,6 +2,8 @@
 
 #include "Shooter/Public/Player/ShooterCharacter.h"
 
+#include "AI/EnemyAIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Shooter/Public/AI/Enemy.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
@@ -1298,6 +1300,11 @@ EPhysicalSurface AShooterCharacter::GetSurfaceType()
 
 void AShooterCharacter::Stun()
 {
+	if (Health <= 0.f)
+	{
+		return;
+	}
+	
 	CombatState = ECombatState::ECS_Stunned;
 	if (HitReactMontage)
 	{
@@ -1325,6 +1332,13 @@ float AShooterCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	if (Health - DamageAmount <= 0.f)
 	{
 		Health = 0.f;
+		Die();
+
+		const AEnemyAIController* const EnemyAIController = Cast<AEnemyAIController>(EventInstigator);
+		if (EnemyAIController)
+		{
+			EnemyAIController->GetBlackBoardComponent()->SetValueAsBool(FName("CharacterDead"), true);
+		}
 	}
 	else
 	{
@@ -1332,4 +1346,23 @@ float AShooterCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	}
 
 	return 0.f;
+}
+
+void AShooterCharacter::Die() const
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && DeathMontage)
+	{
+		AnimInstance->Montage_Play(DeathMontage);
+	}
+}
+
+void AShooterCharacter::FinishDeath()
+{
+	GetMesh()->bPauseAnims = true;
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	if (PlayerController)
+	{
+		DisableInput(PlayerController);
+	}
 }

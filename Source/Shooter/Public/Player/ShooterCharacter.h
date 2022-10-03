@@ -211,6 +211,11 @@ protected:
 
 	void PickUpAmmo(class AAmmo* Ammo);
 
+	void Die() const;
+
+	UFUNCTION(BlueprintCallable)
+	void FinishDeath();
+	
 private:
 	/** Setting some configuration for character movement. */
 	void SetCharacterMovementConfigurations();
@@ -490,6 +495,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* HitReactMontage;
 
+	/** Montage for character death. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* DeathMontage;
+	
 	/** Chance of being stunned when hit by enemy. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float StunChance;

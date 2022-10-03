@@ -26,13 +26,17 @@ AEnemy::AEnemy() :
 	HitNumberDestroyTime(1.5f),
 	bStunned(false),
 	StunChance(0.5f),
+	bCanAttack(true),
+	AttackWaitTime(1.f),
 	AttackLFast(TEXT("AttackLFast")),
 	AttackRFast(TEXT("AttackRFast")),
 	AttackL(TEXT("AttackL")),
 	AttackR(TEXT("AttackR")),
 	LeftWeaponSocket(TEXT("FX_Trail_L_01")),
 	RightWeaponSocket(TEXT("FX_Trail_R_01")),
-	BaseDamage(20.f)
+	BaseDamage(20.f),
+	bDying(false),
+	DeathTime(4.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -93,6 +97,7 @@ void AEnemy::BeginPlay()
 	{
 		EnemyAIController->GetBlackBoardComponent()->SetValueAsVector(TEXT("PatrolPoint"), WorldPatrolPoint);
 		EnemyAIController->GetBlackBoardComponent()->SetValueAsVector(TEXT("PatrolPoint2"), WorldPatrolPoint2);
+		EnemyAIController->GetBlackBoardComponent()->SetValueAsBool(TEXT("CanAttack"), true);
 		EnemyAIController->RunBehaviorTree(BehaviorTree);
 	}
 }
@@ -256,6 +261,11 @@ void AEnemy::BulletHit_Implementation(FHitResult HitResult)
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, HitResult.Location, FRotator(0.f), true);
 	}
 
+	if (bDying)
+	{
+		return;
+	}
+	
 	ShowHeathBar();
 
 	// Determine whether bullet hit stuns
@@ -320,6 +330,34 @@ void AEnemy::PlayAttackMontage(const FName Section, const float PlayRate)
 		AnimInstance->Montage_Play(AttackMontage, PlayRate);
 		AnimInstance->Montage_JumpToSection(Section, AttackMontage);
 	}
+
+	ToggleEnemyCanAttack(false);
+	GetWorldTimerManager().SetTimer(AttackWaitTimer, this, &AEnemy::ResetCanAttack, AttackWaitTime);
+}
+
+void AEnemy::ResetCanAttack()
+{
+	ToggleEnemyCanAttack(true);
+}
+
+void AEnemy::ToggleEnemyCanAttack(const bool bCanAttackCharacter) 
+{
+	bCanAttack = bCanAttackCharacter;
+	if (EnemyAIController)
+	{
+		EnemyAIController->GetBlackBoardComponent()->SetValueAsBool(TEXT("CanAttack"), bCanAttackCharacter);
+	}
+}
+
+void AEnemy::FinishDeath()
+{
+	GetMesh()->bPauseAnims = true;
+	GetWorldTimerManager().SetTimer(DeathTimer, this, &AEnemy::DestroyEnemy, DeathTime);
+}
+
+void AEnemy::DestroyEnemy()
+{
+	Destroy();
 }
 
 FName AEnemy::GetAttackSectionName() const
@@ -350,6 +388,12 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	// Set the Target Blackboard Key to agro the Character
+	if (EnemyAIController)
+	{
+		EnemyAIController->GetBlackBoardComponent()->SetValueAsObject(TEXT("Target"), DamageCauser);
+	}
+	
 	if (Health - DamageAmount <= 0.f)
 	{
 		Health = 0.f;
@@ -365,5 +409,22 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 
 void AEnemy::Die()
 {
+	if (bDying)
+	{
+		return;
+	}
+	bDying = true;
 	HideHealthBar();
+	
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && DeathMontage)
+	{
+		AnimInstance->Montage_Play(DeathMontage);
+	}
+
+	if (EnemyAIController)
+	{
+		EnemyAIController->GetBlackBoardComponent()->SetValueAsBool(TEXT("Dead"), true);
+		EnemyAIController->StopMovement();
+	}
 }

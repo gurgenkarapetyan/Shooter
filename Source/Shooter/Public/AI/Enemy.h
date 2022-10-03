@@ -88,6 +88,16 @@ protected:
 	void ActivateRightWeapon();
 	UFUNCTION(BlueprintCallable)
 	void DeactivateRightWeapon();
+
+	void ResetCanAttack();
+
+	void ToggleEnemyCanAttack(const bool bCanAttackCharacter);
+
+	UFUNCTION(BlueprintCallable)
+	void FinishDeath();
+
+	UFUNCTION()
+	void DestroyEnemy();
 	
 	/** Toggle InAttackRange and Blackboard values for checking attack.
 	 *	@param InAttackRange
@@ -209,6 +219,16 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	bool bInAttackRange;
 
+	/** True when enemy can attack. */
+	UPROPERTY(VisibleAnywhere, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	bool bCanAttack;
+	
+	FTimerHandle AttackWaitTimer;
+
+	/** Minimum wait time between attacks. */
+	UPROPERTY(EditAnywhere, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float AttackWaitTime;
+	
 	/** Montage containing different attacks. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* AttackMontage;
@@ -236,6 +256,18 @@ private:
 	/** Base damage for the enemy. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float BaseDamage;
+
+	/** Death anim montage for the enemy. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* DeathMontage;
+
+	bool bDying;
+
+	FTimerHandle DeathTimer;
+
+	/** Time after death until destroy. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float DeathTime;
 	
 	/** Overlap sphere for attack range. */
 	UPROPERTY(EditAnywhere, Category = "Behavior Tree", meta = (AllowPrivateAccess = "true"))
