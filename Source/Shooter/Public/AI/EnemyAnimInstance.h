@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "GruxAnimInstance.generated.h"
+#include "EnemyAnimInstance.generated.h"
 
 class AEnemy;
 
