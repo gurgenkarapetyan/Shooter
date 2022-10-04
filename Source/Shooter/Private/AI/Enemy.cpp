@@ -125,7 +125,7 @@ void AEnemy::CombatRangeSphereEndOverlap(UPrimitiveComponent* OverlappedComponen
 void AEnemy::SetInAttackRangeProperties(const bool InAttackRange)
 {
 	bInAttackRange = InAttackRange;
-	if (EnemyAIController)
+	if (EnemyAIController && EnemyAIController->GetBlackBoardComponent())
 	{
 		EnemyAIController->GetBlackBoardComponent()->SetValueAsBool(TEXT("InAttackRange"), InAttackRange);
 	}
@@ -243,9 +243,9 @@ void AEnemy::UpdateHitNumbers() const
 	}
 }
 
-void AEnemy::BulletHit_Implementation(FHitResult HitResult)
+void AEnemy::BulletHit_Implementation(FHitResult HitResult, AActor* Shooter, AController* ShooterController)
 {
-	IBulletHitInterface::BulletHit_Implementation(HitResult);
+	IBulletHitInterface::BulletHit_Implementation(HitResult, Shooter, ShooterController);
 
 	if (ImpactSound)
 	{
@@ -255,50 +255,6 @@ void AEnemy::BulletHit_Implementation(FHitResult HitResult)
 	if (ImpactParticles)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, HitResult.Location, FRotator(0.f), true);
-	}
-
-	if (bDying)
-	{
-		return;
-	}
-	
-	ShowHeathBar();
-
-	// Determine whether bullet hit stuns
-	const float Stunned = FMath::FRandRange(0.f, 1.f);
-	if (Stunned <= StunChance)
-	{
-		// Stun the enemy
-		PlayHitMontage(FName("HitReactFront"));
-		SetStunned(true);
-	}
-}
-
-void AEnemy::PlayHitMontage(const FName Section, const float PlayRate)
-{
-	UAnimInstance* const AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance)
-	{
-		AnimInstance->Montage_Play(HitMontage, PlayRate);
-		AnimInstance->Montage_JumpToSection(Section, HitMontage);
-	}
-
-	bCanHitReact = false;
-	const float HitReactTime = FMath::FRandRange(HitReactTimeMin, HitReactTimeMax);
-	GetWorldTimerManager().SetTimer(HitReactTimer, this, &AEnemy::ResetHitReactTimer, HitReactTime);
-}
-
-void AEnemy::ResetHitReactTimer()
-{
-	bCanHitReact = true;
-}
-
-void AEnemy::SetStunned(const bool Stunned)
-{
-	bStunned = Stunned;
-	if (EnemyAIController)
-	{
-		EnemyAIController->GetBlackBoardComponent()->SetValueAsBool(TEXT("Stunned"), Stunned);
 	}
 }
 
@@ -399,6 +355,22 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	{
 		Health -= DamageAmount;
 	}
+
+	if (bDying)
+	{
+		return DamageAmount;
+	}
+	
+	ShowHeathBar();
+
+	// Determine whether bullet hit stuns
+	const float Stunned = FMath::FRandRange(0.f, 1.f);
+	if (Stunned <= StunChance)
+	{
+		// Stun the enemy
+		PlayHitMontage(FName("HitReactFront"));
+		SetStunned(true);
+	}
 	
 	return DamageAmount;
 }
@@ -422,5 +394,33 @@ void AEnemy::Die()
 	{
 		EnemyAIController->GetBlackBoardComponent()->SetValueAsBool(TEXT("Dead"), true);
 		EnemyAIController->StopMovement();
+	}
+}
+
+void AEnemy::PlayHitMontage(const FName Section, const float PlayRate)
+{
+	UAnimInstance* const AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->Montage_Play(HitMontage, PlayRate);
+		AnimInstance->Montage_JumpToSection(Section, HitMontage);
+	}
+
+	bCanHitReact = false;
+	const float HitReactTime = FMath::FRandRange(HitReactTimeMin, HitReactTimeMax);
+	GetWorldTimerManager().SetTimer(HitReactTimer, this, &AEnemy::ResetHitReactTimer, HitReactTime);
+}
+
+void AEnemy::ResetHitReactTimer()
+{
+	bCanHitReact = true;
+}
+
+void AEnemy::SetStunned(const bool Stunned)
+{
+	bStunned = Stunned;
+	if (EnemyAIController)
+	{
+		EnemyAIController->GetBlackBoardComponent()->SetValueAsBool(TEXT("Stunned"), Stunned);
 	}
 }
