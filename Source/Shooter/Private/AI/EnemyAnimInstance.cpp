@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/GruxAnimInstance.h"
+#include "AI/EnemyAnimInstance.h"
 
 #include "AI/Enemy.h"
 
